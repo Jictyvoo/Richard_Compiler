@@ -5,8 +5,41 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class TokensInformation {
-    public HashMap<String, String> reservedWords() {
-        return null;
+
+    private static TokensInformation instance = null;
+
+    private TokensInformation(){}
+
+    public static TokensInformation getInstance(){
+        if(instance == null){
+            instance = new TokensInformation();
+        }
+        return instance;
+    }
+
+    public HashSet<String> reservedWords() {
+        return new HashSet<>(Arrays.asList(
+                "class",
+                "const",
+                "variables",
+                "method",
+                "return",
+                "main",
+                "if",
+                "then",
+                "else",
+                "while",
+                "read",
+                "write",
+                "void",
+                "int",
+                "float",
+                "bool",
+                "string",
+                "true",
+                "false",
+                "extends"
+        ));
     }
 
     public HashMap<String, String> commentTokens() {

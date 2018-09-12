@@ -23,6 +23,14 @@ public class LexicalAnalyser {
     }
 
     private Token analyse(Lexeme lexeme) {
+        String token = lexeme.getValue();
+        if (token.matches("(-)?\\s*[0-9]([0-9]*\\.?[0-9]+)?")) {  /*verify if the number is correct*/
+            System.out.println(lexeme.getValue());
+            return new Token(lexeme.getValue(), "number", lexeme);
+        } else if (token.matches("[_]?(([a-z]|[A-Z]|_)+[0-9]*)+(([a-z]|[A-Z]|[0-9]|_)*)*")) {
+            System.out.println(lexeme.getValue());
+            return new Token(lexeme.getValue(), "identifier", lexeme);  /*verify if the identifier is correct*/
+        }
         return null;
     }
 
@@ -47,7 +55,8 @@ public class LexicalAnalyser {
                         completedLexeme = true;
                     }
                     currentLexeme.append(character);
-                } else */if (character == ' ') {
+                } else */
+                if (character == ' ') {
                     completedLexeme = true;
                 } else if (columnCounter == line.length() - 1) {
                     currentLexeme.append(character);
@@ -57,7 +66,6 @@ public class LexicalAnalyser {
                 }
                 if (completedLexeme) {
                     String value = currentLexeme.toString();
-                    System.out.println(value);
                     Lexeme lexeme = new Lexeme(value, line, lineCounter, columnCounter, filename);
                     Token generatedToken = this.analyse(lexeme);
                     if (generatedToken != null) {
