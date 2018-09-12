@@ -1,0 +1,11 @@
+# ignoring idea/netbeans/eclipse project
+.idea/
+out/
+*.iml
+.project
+nbproject/
+build/
+bin/
+
+# ignoring compiled files
+*.class
