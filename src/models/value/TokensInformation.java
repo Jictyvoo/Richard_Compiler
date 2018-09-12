@@ -8,10 +8,11 @@ public class TokensInformation {
 
     private static TokensInformation instance = null;
 
-    private TokensInformation(){}
+    private TokensInformation() {
+    }
 
-    public static TokensInformation getInstance(){
-        if(instance == null){
+    public static TokensInformation getInstance() {
+        if (instance == null) {
             instance = new TokensInformation();
         }
         return instance;
@@ -42,6 +43,22 @@ public class TokensInformation {
         ));
     }
 
+    public HashSet<String> delimiters() {
+        return new HashSet<>(Arrays.asList(";", ",", "(", ")", "[", "]", "{", "}", "."));
+    }
+
+    public HashSet<String> relationalOperators() {
+        return new HashSet<>(Arrays.asList("!=", "==", "<", "<=", ">", ">=", "="));
+    }
+
+    public HashSet<String> logicOperators() {
+        return new HashSet<>(Arrays.asList("!", "&&", "||"));
+    }
+
+    public HashSet<String> arithmeticOperators() {
+        return new HashSet<>(Arrays.asList("+", "-", "*", "/", "++", "--"));
+    }
+
     public HashMap<String, String> commentTokens() {
         HashMap<String, String> tokens = new HashMap<>();
         tokens.put("line", "//");
@@ -51,6 +68,7 @@ public class TokensInformation {
     }
 
     public HashSet<String> canTogether() {
-        return new HashSet<>(Arrays.asList("(", ")", "[", "]", "{", ",", ";", ":", "}", "?", "*", "+", "-", "'"));
+        return new HashSet<>(Arrays.asList("(", ")", "[", "]", "{", ",", ".", ";", ":", "}",
+                "?", "*", "+", "-", "=", "'", "\\", "&&", "||", "!", ">", "<"));
     }
 }

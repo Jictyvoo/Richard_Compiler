@@ -22,4 +22,10 @@ public class Token {
     public Lexeme getLexeme() {
         return lexeme;
     }
+
+    @Override
+    public String toString() {
+        return this.lexeme.getFile() + "-" + this.lexeme.getLineNumber() + ":" + this.lexeme.getColumn() + " >> Type: " +
+                this.type + " -> Value: " + this.name;
+    }
 }
