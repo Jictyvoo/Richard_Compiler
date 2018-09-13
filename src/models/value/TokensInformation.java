@@ -69,6 +69,6 @@ public class TokensInformation {
 
     public HashSet<String> canTogether() {
         return new HashSet<>(Arrays.asList("(", ")", "[", "]", "{", ",", ".", ";", ":", "}",
-                "?", "*", "+", "-", "=", "'", "\\", "&&", "||", "!", ">", "<"));
+                "?", "*", "+", "-", "=", "'", "\\", "&", "|", "!", ">", "<"));
     }
 }

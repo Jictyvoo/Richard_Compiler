@@ -26,7 +26,7 @@ public class LexicalAnalyser {
         return instance;
     }
 
-    private Token analyse(Lexeme lexeme) {
+    Token analyse(Lexeme lexeme) {
         String token = lexeme.getValue();
         if (TokensInformation.getInstance().reservedWords().contains(token)) {
             return new Token(lexeme.getValue(), "reserved", lexeme);
@@ -65,12 +65,17 @@ public class LexicalAnalyser {
         LinkedList<Token> tokenList = new LinkedList<>();
 
         StringBuilder currentLexeme = new StringBuilder();
+        StringBuilder nextLexeme = new StringBuilder();
         int lineCounter = 0;
         boolean openString = false;
         char previous = 0;
         for (String line : fileManager) {
             short columnCounter = 0;
             for (char character : fileManager.forLine(line)) {
+                if (nextLexeme.length() > 0) {
+                    currentLexeme = nextLexeme;
+                    nextLexeme = new StringBuilder();
+                }
                 boolean completedLexeme = false;
                 if (character == '\\' && previous == '\\') {
                     previous = 0;
@@ -87,24 +92,36 @@ public class LexicalAnalyser {
                     } else {
                         currentLexeme.append(character);
                     }
-                } else if (character == 9 || character == 32) {
+                } else if (character == 9 || character == 32) { /*verify spaces to break words*/
                     completedLexeme = true;
                 } else if (columnCounter == line.length() - 1) {
                     currentLexeme.append(character);
                     completedLexeme = true;
-                } else {
+                } /*else if (TokensInformation.getInstance().canTogether().contains("" + previous)) {
+                    if (TokensInformation.getInstance().canTogether().contains("" + character)) {
+                        currentLexeme.deleteCharAt(currentLexeme.length() - 1);
+                        nextLexeme.append(previous);
+                        nextLexeme.append(character);
+                        completedLexeme = true;
+                    } else {
+                        completedLexeme = true;
+                        nextLexeme.append(character);
+                    }
+                }*/ else {
                     currentLexeme.append(character);
                 }
                 if (completedLexeme) {
-                    String value = currentLexeme.toString();
-                    Lexeme lexeme = new Lexeme(value, line, lineCounter, columnCounter, filename);
-                    Token generatedToken = this.analyse(lexeme);
-                    if (generatedToken != null) {
-                        tokenList.add(generatedToken);
-                    } else {
-                        this.parseErrors.add(new ParseErrors("Lexical Error", "Unrecognized Token", lexeme));
+                    if (currentLexeme.length() > 0) {
+                        String value = currentLexeme.toString();
+                        Lexeme lexeme = new Lexeme(value, line, lineCounter, columnCounter, filename);
+                        Token generatedToken = this.analyse(lexeme);
+                        if (generatedToken != null) {
+                            tokenList.add(generatedToken);
+                        } else {
+                            this.parseErrors.add(new ParseErrors("Lexical Error", "Unrecognized Token", lexeme));
+                        }
+                        currentLexeme = new StringBuilder();
                     }
-                    currentLexeme = new StringBuilder();
                 }
                 columnCounter += 1;
                 previous = character;
