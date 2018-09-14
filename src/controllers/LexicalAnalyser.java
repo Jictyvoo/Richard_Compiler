@@ -14,10 +14,12 @@ import java.util.List;
 public class LexicalAnalyser {
 
     private static LexicalAnalyser instance = null;
-    private List<ParseErrors> parseErrors;
+    private HashMap<String, List<ParseErrors>> parseErrors;
+    private HashMap<String, List<Token>> tokenList;
 
     private LexicalAnalyser() {
-        this.parseErrors = new LinkedList<>();
+        this.parseErrors = new HashMap<>();
+        this.tokenList = new HashMap<>();
     }
 
     public static LexicalAnalyser getInstance() {
@@ -61,9 +63,29 @@ public class LexicalAnalyser {
         return null;
     }
 
+    private StringBuilder verifyToken(List<Token> tokenList, StringBuilder currentLexeme, String line, int lineCounter, short columnCounter, String filename) {
+        if (currentLexeme.length() > 0) {   /*if have a true lexeme*/
+            String value = currentLexeme.toString();
+            Lexeme lexeme = new Lexeme(value, line, lineCounter, columnCounter, filename);
+            Token generatedToken = this.analyse(lexeme);
+            if (generatedToken != null) {
+                tokenList.add(generatedToken);
+            } else {
+                this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "Unrecognized Token", lexeme));
+            }
+            //currentLexeme = new StringBuilder();
+        }
+        return new StringBuilder();
+    }
+
     public List<Token> parse(String filename) throws FileNotFoundException {
         FileManager fileManager = new FileManager(filename);
-        LinkedList<Token> tokenList = new LinkedList<>();
+        if(!this.parseErrors.containsKey(filename)){
+            this.parseErrors.put(filename, new LinkedList<>());
+        }
+        if(!this.tokenList.containsKey(filename)){
+            this.tokenList.put(filename, new LinkedList<>());
+        }
 
         StringBuilder currentLexeme = new StringBuilder();
         StringBuilder nextLexeme = new StringBuilder();
@@ -96,18 +118,28 @@ public class LexicalAnalyser {
                 } else if (character == 9 || character == 32) { /*verify spaces to break words*/
                     completedLexeme = true;
                 } else if (TokensInformation.getInstance().split().contains(character)) {   /*Here will start token split*/
-                    completedLexeme = true; /*if contains a split character, complete previous lexeme*/
-                    nextLexeme.append(character);   /*next lexeme will contain split character*/
-                    HashMap<Character, Character> canTogether = TokensInformation.getInstance().canTogether();
-                    if (canTogether.containsKey(previous)) {
-                        if (canTogether.get(previous) == character) {   /*if current character can be together with other*/
-                            nextLexeme.deleteCharAt(nextLexeme.length() - 1);
-                            currentLexeme.append(character);
+                    if (((previous >= '0' && previous <= '9') && character == '.')) {
+                        currentLexeme.append(character);
+                    } else {
+                        completedLexeme = true; /*if contains a split character, complete previous lexeme*/
+                        nextLexeme.append(character);   /*next lexeme will contain split character*/
+                        HashMap<Character, Character> canTogether = TokensInformation.getInstance().canTogether();
+                        if (canTogether.containsKey(previous)) {
+                            if (canTogether.get(previous) == character) {   /*if current character can be together with other*/
+                                if (currentLexeme.length() > 0) {   /*need to work with ------++*/
+                                    nextLexeme.deleteCharAt(nextLexeme.length() - 1);
+                                    currentLexeme.append(character);
+                                }
+                            }
                         }
                     }
-                } else if (TokensInformation.getInstance().split().contains(previous)) {    /*end of splited tokens verification*/
-                    completedLexeme = true; /*complete lexeme if previous token is a split token like*/
-                    nextLexeme.append(character);
+                } else if (TokensInformation.getInstance().split().contains(previous)) {    /*end of spliced tokens verification*/
+                    if (((character >= '0' && character <= '9') && previous == '.')) {
+                        currentLexeme.append(character);
+                    } else {
+                        completedLexeme = true; /*complete lexeme if previous token is a split token like*/
+                        nextLexeme.append(character);
+                    }
                 } else if (columnCounter == line.length() - 1) {    /*verify if character is at end of line*/
                     currentLexeme.append(character);
                     completedLexeme = true;
@@ -115,31 +147,28 @@ public class LexicalAnalyser {
                     currentLexeme.append(character);
                 }
                 if (completedLexeme) {
-                    if (currentLexeme.length() > 0) {   /*if have a true lexeme*/
-                        String value = currentLexeme.toString();
-                        Lexeme lexeme = new Lexeme(value, line, lineCounter, columnCounter, filename);
-                        Token generatedToken = this.analyse(lexeme);
-                        if (generatedToken != null) {
-                            tokenList.add(generatedToken);
-                        } else {
-                            this.parseErrors.add(new ParseErrors("Lexical Error", "Unrecognized Token", lexeme));
-                        }
-                        currentLexeme = new StringBuilder();
-                    }
+                    currentLexeme = this.verifyToken(this.tokenList.get(filename), currentLexeme, line, lineCounter, columnCounter, filename);
                 }
                 columnCounter += 1;
                 previous = character;
             }
+            if (openString) {
+                Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, (short) 0, filename);
+                this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "String not closed", lexeme));
+                openString = false;
+                currentLexeme = this.verifyToken(this.tokenList.get(filename), currentLexeme, line, lineCounter, columnCounter, filename);
+            }
             lineCounter += 1;
         }
-        if (openString) {
-            Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, (short) 0, filename);
-            this.parseErrors.add(new ParseErrors("Lexical Error", "String not closed", lexeme));
+        if (currentLexeme.length() > 0) {
+            this.verifyToken(this.tokenList.get(filename), currentLexeme, "", lineCounter - 1, (short) 0, filename);
+        } else if (nextLexeme.length() > 0) {
+            this.verifyToken(this.tokenList.get(filename), nextLexeme, "", lineCounter - 1, (short) 0, filename);
         }
-        return tokenList;
+        return this.tokenList.get(filename);
     }
 
-    public List<ParseErrors> getParseErrors() {
+    public HashMap<String, List<ParseErrors>> getParseErrors() {
         return this.parseErrors;
     }
 

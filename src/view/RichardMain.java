@@ -8,16 +8,17 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 public class RichardMain {
-    public static void main(String ... args){
+    public static void main(String... args) {
         LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance();
         try {
-            List<Token> tokens = lexicalAnalyser.parse("testFile.rchrd");
-            for(Token token : tokens){
+            List<Token> tokens = lexicalAnalyser.parse("inputDemo/testFile.rchrd");
+            for (Token token : tokens) {
                 System.out.println(token);
             }
-            List<ParseErrors> parseErrors = lexicalAnalyser.getParseErrors();
-            for(ParseErrors error : parseErrors){
-                System.out.println(error);
+            for (List<ParseErrors> parseErrors : lexicalAnalyser.getParseErrors().values()) {
+                for (ParseErrors error : parseErrors) {
+                    System.out.println(error);
+                }
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

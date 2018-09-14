@@ -30,7 +30,7 @@ class RichardTestFile {
         pointer[2] = (myLittleFloat*(92+5--))/23;
         if pointer[2] && myLittleFloat || "pineapple" {
             self.method(pointer[1],pointer[2]);
-        } else if 2 >= 4 {
+        } else if 2 >=4 and true {
             self.doSomething(myLittleFloat++--);
         } else if !!!!pointer {
             self.doSomething(myLittleFloat / 23++);
@@ -48,6 +48,11 @@ Will not start comment block */
 
 $notExist = []array @
 
-myLittleFloat++---; //need to fix error when closing string and line became a new line
+myLittleFloat++-----; //need to fix error when closing string and line became a new line
 
 "This is a string error
+
+int number = 45.abc
+string thing......;
+
+int errorNumber = 32.12.543.53;
