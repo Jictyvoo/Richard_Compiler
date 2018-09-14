@@ -66,7 +66,7 @@ char(char | digit | _)*
 
 Will exists two comment types, line comment and block comment
 
-* Line Comment - /comment
+* Line Comment - //comment
 * Block Comment - /\*comment\*/
 
 ### Delimiters

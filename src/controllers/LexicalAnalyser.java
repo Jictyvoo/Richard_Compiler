@@ -7,6 +7,7 @@ import models.value.Token;
 import models.value.TokensInformation;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class LexicalAnalyser {
 
         StringBuilder currentLexeme = new StringBuilder();
         StringBuilder nextLexeme = new StringBuilder();
-        int lineCounter = 0;
+        int lineCounter = 1;
         boolean openString = false;
         char previous = 0;
         for (String line : fileManager) {
@@ -77,37 +78,42 @@ public class LexicalAnalyser {
                     nextLexeme = new StringBuilder();
                 }
                 boolean completedLexeme = false;
-                if (character == '\\' && previous == '\\') {
+                if (character == '\\' && previous == '\\') {    /*nullify previous if have two backslash*/
                     previous = 0;
                 }
-                if (character == '\"' || openString) {
-                    if (!openString && previous != '\\') {
+                if (character == '\"' || openString) {  /*start of string verification*/
+                    if (!openString && previous != '\\') {  /*if string was not open and " was not followed by slash*/
                         openString = true;
-                        completedLexeme = true;
-                    } else if (previous != '\\' && character == '\"') {
-                        completedLexeme = true;
-                        currentLexeme.insert(0, '\"');
-                        currentLexeme.append('\"');
-                        openString = false;
+                        completedLexeme = true; /*finish previous lexeme*/
+                    } else if (previous != '\\' && character == '\"') { /*if string was open and find another "*/
+                        completedLexeme = true; /*complete string lexeme*/
+                        currentLexeme.insert(0, '\"');  /*insert " at beginning of lexeme*/
+                        currentLexeme.append('\"');  /*insert " at ending of lexeme*/
+                        openString = false; /*close string*/
                     } else {
-                        currentLexeme.append(character);
+                        currentLexeme.append(character);    /*add all characters inside the string*/
                     }
                 } else if (character == 9 || character == 32) { /*verify spaces to break words*/
                     completedLexeme = true;
+                } else if (TokensInformation.getInstance().split().contains(character)) {
+                    completedLexeme = true;
+                    nextLexeme.append(character);
+                    //System.out.println("Line: " + lineCounter + ":" + columnCounter + currentLexeme + " ---> " + character);
+                    HashMap<Character, Character> canTogether = TokensInformation.getInstance().canTogether();
+                    if (canTogether.containsKey(previous)) {
+                        if (canTogether.get(previous) == character) {
+                            completedLexeme = false;
+                            nextLexeme.deleteCharAt(nextLexeme.length() - 1);
+                            currentLexeme.append(character);
+                        }
+                    }
                 } else if (columnCounter == line.length() - 1) {
                     currentLexeme.append(character);
                     completedLexeme = true;
-                } /*else if (TokensInformation.getInstance().canTogether().contains("" + previous)) {
-                    if (TokensInformation.getInstance().canTogether().contains("" + character)) {
-                        currentLexeme.deleteCharAt(currentLexeme.length() - 1);
-                        nextLexeme.append(previous);
-                        nextLexeme.append(character);
-                        completedLexeme = true;
-                    } else {
-                        completedLexeme = true;
-                        nextLexeme.append(character);
-                    }
-                }*/ else {
+                } else if (TokensInformation.getInstance().split().contains(previous)) {
+                    completedLexeme = true;
+                    nextLexeme.append(character);
+                } else {
                     currentLexeme.append(character);
                 }
                 if (completedLexeme) {
@@ -128,7 +134,10 @@ public class LexicalAnalyser {
             }
             lineCounter += 1;
         }
-
+        if (openString) {
+            Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, (short) 0, filename);
+            this.parseErrors.add(new ParseErrors("Lexical Error", "String not closed", lexeme));
+        }
         return tokenList;
     }
 

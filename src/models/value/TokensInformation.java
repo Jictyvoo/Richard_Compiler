@@ -67,8 +67,21 @@ public class TokensInformation {
         return tokens;
     }
 
-    public HashSet<String> canTogether() {
-        return new HashSet<>(Arrays.asList("(", ")", "[", "]", "{", ",", ".", ";", ":", "}",
-                "?", "*", "+", "-", "=", "'", "\\", "&", "|", "!", ">", "<"));
+    public HashMap<Character, Character> canTogether() {
+        HashMap<Character, Character> hashMap = new HashMap<>();
+        hashMap.put('&', '&');
+        hashMap.put('|', '|');
+        hashMap.put('+', '+');
+        hashMap.put('-', '-');
+        hashMap.put('=', '=');
+        hashMap.put('!', '=');
+        hashMap.put('>', '=');
+        hashMap.put('<', '=');
+        return hashMap;
+    }
+
+    public HashSet<Character> split() {
+        return new HashSet<>(Arrays.asList('(', ')', '[', ']', '{', ',', '.', ';', ':', '}',
+                '?', '*', '+', '-', '=', '\'', '\\', '/', '&', '|', '!', '>', '<'));
     }
 }
