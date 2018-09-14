@@ -95,29 +95,27 @@ public class LexicalAnalyser {
                     }
                 } else if (character == 9 || character == 32) { /*verify spaces to break words*/
                     completedLexeme = true;
-                } else if (TokensInformation.getInstance().split().contains(character)) {
-                    completedLexeme = true;
-                    nextLexeme.append(character);
-                    //System.out.println("Line: " + lineCounter + ":" + columnCounter + currentLexeme + " ---> " + character);
+                } else if (TokensInformation.getInstance().split().contains(character)) {   /*Here will start token split*/
+                    completedLexeme = true; /*if contains a split character, complete previous lexeme*/
+                    nextLexeme.append(character);   /*next lexeme will contain split character*/
                     HashMap<Character, Character> canTogether = TokensInformation.getInstance().canTogether();
                     if (canTogether.containsKey(previous)) {
-                        if (canTogether.get(previous) == character) {
-                            completedLexeme = false;
+                        if (canTogether.get(previous) == character) {   /*if current character can be together with other*/
                             nextLexeme.deleteCharAt(nextLexeme.length() - 1);
                             currentLexeme.append(character);
                         }
                     }
-                } else if (columnCounter == line.length() - 1) {
+                } else if (TokensInformation.getInstance().split().contains(previous)) {    /*end of splited tokens verification*/
+                    completedLexeme = true; /*complete lexeme if previous token is a split token like*/
+                    nextLexeme.append(character);
+                } else if (columnCounter == line.length() - 1) {    /*verify if character is at end of line*/
                     currentLexeme.append(character);
                     completedLexeme = true;
-                } else if (TokensInformation.getInstance().split().contains(previous)) {
-                    completedLexeme = true;
-                    nextLexeme.append(character);
                 } else {
                     currentLexeme.append(character);
                 }
                 if (completedLexeme) {
-                    if (currentLexeme.length() > 0) {
+                    if (currentLexeme.length() > 0) {   /*if have a true lexeme*/
                         String value = currentLexeme.toString();
                         Lexeme lexeme = new Lexeme(value, line, lineCounter, columnCounter, filename);
                         Token generatedToken = this.analyse(lexeme);

@@ -20,26 +20,8 @@ public class TokensInformation {
 
     public HashSet<String> reservedWords() {
         return new HashSet<>(Arrays.asList(
-                "class",
-                "const",
-                "variables",
-                "method",
-                "return",
-                "main",
-                "if",
-                "then",
-                "else",
-                "while",
-                "read",
-                "write",
-                "void",
-                "int",
-                "float",
-                "bool",
-                "string",
-                "true",
-                "false",
-                "extends"
+                "class", "const", "variables", "method", "return", "main", "if", "then", "else", "while", "read",
+                "write", "void", "int", "float", "bool", "string", "true", "false", "extends"
         ));
     }
 

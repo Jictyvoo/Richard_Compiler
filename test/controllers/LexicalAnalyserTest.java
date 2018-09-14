@@ -62,6 +62,8 @@ class LexicalAnalyserTest {
         assertNull(receivedToken);
         receivedToken = lexicalAnalyser.analyse(this.generateLexeme("//*-65.99&%U&TET$599\""));
         assert (receivedToken != null);
+        receivedToken = lexicalAnalyser.analyse(this.generateLexeme("/*-65.99&%U&TET$599\"*/"));
+        assert (receivedToken != null);
     }
 
 }

@@ -11,7 +11,7 @@ public class RichardMain {
     public static void main(String ... args){
         LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance();
         try {
-            List<Token> tokens = lexicalAnalyser.parse("README.md");
+            List<Token> tokens = lexicalAnalyser.parse("testFile.rchrd");
             for(Token token : tokens){
                 System.out.println(token);
             }
