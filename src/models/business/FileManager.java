@@ -55,7 +55,7 @@ public class FileManager implements Iterable<String> {
                     @Override
                     public Character next() {
                         char character = 0;
-                        if(this.line.length() > 0){
+                        if (this.line.length() > 0) {
                             character = this.line.charAt(this.position);
                             this.position += 1;
                         }

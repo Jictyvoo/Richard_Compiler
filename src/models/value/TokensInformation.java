@@ -41,11 +41,14 @@ public class TokensInformation {
         return new HashSet<>(Arrays.asList("+", "-", "*", "/", "++", "--"));
     }
 
-    public HashMap<String, String> commentTokens() {
-        HashMap<String, String> tokens = new HashMap<>();
-        tokens.put("line", "//");
-        tokens.put("beginning", "/*");
-        tokens.put("ending", "*/");
+    public HashMap<String, HashMap<Character, Character>> commentTokens() {
+        HashMap<String, HashMap<Character, Character>> tokens = new HashMap<>();
+        tokens.put("line", new HashMap<>());
+        tokens.get("line").put('/', '/');
+        tokens.put("beginning", new HashMap<>());
+        tokens.get("beginning").put('/', '*');
+        tokens.put("ending", new HashMap<>());
+        tokens.get("ending").put('*', '/');
         return tokens;
     }
 

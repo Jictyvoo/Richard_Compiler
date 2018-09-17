@@ -50,9 +50,11 @@ $notExist = []array @
 
 myLittleFloat++-----; //need to fix error when closing string and line became a new line
 
-"This is a string error
+"This is a string error */
 
 int number = 45.abc
 string thing......;
 
 int errorNumber = 32.12.543.53;
+
+/* Here is a comment not closed

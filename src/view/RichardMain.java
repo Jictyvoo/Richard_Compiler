@@ -11,9 +11,11 @@ public class RichardMain {
     public static void main(String... args) {
         LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance();
         try {
-            List<Token> tokens = lexicalAnalyser.parse("inputDemo/testFile.rchrd");
-            for (Token token : tokens) {
-                System.out.println(token);
+            lexicalAnalyser.parse("inputDemo/testFile.rchrd");
+            for (List<Token> tokens : lexicalAnalyser.getTokenList().values()) {
+                for (Token token : tokens) {
+                    System.out.println(token);
+                }
             }
             for (List<ParseErrors> parseErrors : lexicalAnalyser.getParseErrors().values()) {
                 for (ParseErrors error : parseErrors) {

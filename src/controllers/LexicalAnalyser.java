@@ -56,7 +56,7 @@ public class LexicalAnalyser {
             if (validCharacters) {
                 return new Token(lexeme.getValue(), "string", lexeme);
             }
-        } else if (token.matches("/\\*.*\\*/") || token.matches("//.*")) {
+        } else if (token.matches("/\\*(.|\\n)*\\*/") || token.matches("//.*")) {
             return new Token(lexeme.getValue(), "comment", lexeme); /*verify if comment is correct*/
         }
 
@@ -73,23 +73,24 @@ public class LexicalAnalyser {
             } else {
                 this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "Unrecognized Token", lexeme));
             }
-            //currentLexeme = new StringBuilder();
         }
         return new StringBuilder();
     }
 
     public List<Token> parse(String filename) throws FileNotFoundException {
         FileManager fileManager = new FileManager(filename);
-        if(!this.parseErrors.containsKey(filename)){
+        if (!this.parseErrors.containsKey(filename)) {
             this.parseErrors.put(filename, new LinkedList<>());
         }
-        if(!this.tokenList.containsKey(filename)){
+        if (!this.tokenList.containsKey(filename)) {
             this.tokenList.put(filename, new LinkedList<>());
         }
 
         StringBuilder currentLexeme = new StringBuilder();
         StringBuilder nextLexeme = new StringBuilder();
         int lineCounter = 1;
+        short column = 0;
+        byte openComment = 0;
         boolean openString = false;
         char previous = 0;
         for (String line : fileManager) {
@@ -103,7 +104,25 @@ public class LexicalAnalyser {
                 if (character == '\\' && previous == '\\') {    /*nullify previous if have two backslash*/
                     previous = 0;
                 }
-                if (character == '\"' || openString) {  /*start of string verification*/
+                if (!openString && ((previous == '/' && (character == '*' || character == '/')) || openComment > 0)) {
+                    currentLexeme.append(character);    /*Here is the verification for comments*/
+                    if (previous == '/' && character == '/') {
+                        openComment = 1;
+                    } else if (previous == '/' && character == '*') {
+                        openComment = 2;
+                    } else if (openComment == 2 && (previous == '*' && character == '/')) {
+                        openComment = 0;
+                        completedLexeme = true;
+                    } else if (openComment == 1 && columnCounter == line.length() - 1) {
+                        openComment = 0;
+                        completedLexeme = true;
+                    }
+                } else if (!openString && previous == '*' && character == '/') {    /*only to verify if has a unopened comment*/
+                    currentLexeme.append(character);
+                    Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, column, filename);
+                    this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "Comment not opened", lexeme));
+                    currentLexeme = new StringBuilder();
+                } else if (character == '\"' || openString) {  /*start of string verification*/
                     if (!openString && previous != '\\') {  /*if string was not open and " was not followed by slash*/
                         openString = true;
                         completedLexeme = true; /*finish previous lexeme*/
@@ -150,20 +169,26 @@ public class LexicalAnalyser {
                     currentLexeme = this.verifyToken(this.tokenList.get(filename), currentLexeme, line, lineCounter, columnCounter, filename);
                 }
                 columnCounter += 1;
+                column = columnCounter;
                 previous = character;
             }
             if (openString) {
-                Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, (short) 0, filename);
+                Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, column, filename);
                 this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "String not closed", lexeme));
                 openString = false;
-                currentLexeme = this.verifyToken(this.tokenList.get(filename), currentLexeme, line, lineCounter, columnCounter, filename);
+                currentLexeme = new StringBuilder();
+            } else if(openComment == 2){
+                currentLexeme.append('\n');
             }
             lineCounter += 1;
         }
-        if (currentLexeme.length() > 0) {
-            this.verifyToken(this.tokenList.get(filename), currentLexeme, "", lineCounter - 1, (short) 0, filename);
+        if (openComment > 0) {
+            Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, column, filename);
+            this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "Comment not closed", lexeme));
+        } else if (currentLexeme.length() > 0) {
+            this.verifyToken(this.tokenList.get(filename), currentLexeme, "", lineCounter - 1, column, filename);
         } else if (nextLexeme.length() > 0) {
-            this.verifyToken(this.tokenList.get(filename), nextLexeme, "", lineCounter - 1, (short) 0, filename);
+            this.verifyToken(this.tokenList.get(filename), nextLexeme, "", lineCounter - 1, column, filename);
         }
         return this.tokenList.get(filename);
     }
@@ -172,4 +197,7 @@ public class LexicalAnalyser {
         return this.parseErrors;
     }
 
+    public HashMap<String, List<Token>> getTokenList() {
+        return this.tokenList;
+    }
 }
