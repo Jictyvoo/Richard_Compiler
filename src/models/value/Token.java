@@ -1,21 +1,17 @@
 package models.value;
 
+import util.TokenType;
+
 public class Token {
-    private String name;
-    private String type;
+    private TokenType type;
     private Lexeme lexeme;
 
-    public Token(String name, String type, Lexeme lexeme) {
-        this.name = name;
+    public Token(TokenType type, Lexeme lexeme) {
         this.type = type;
         this.lexeme = lexeme;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getType() {
+    public TokenType getType() {
         return type;
     }
 
@@ -26,6 +22,6 @@ public class Token {
     @Override
     public String toString() {
         return this.lexeme.getFile() + "-" + this.lexeme.getLineNumber() + ":" + this.lexeme.getColumn() + " >> Type: " +
-                this.type + " -> Value: " + this.name;
+                this.type.getName() + " -> Value: " + this.lexeme.getValue();
     }
 }

@@ -3,8 +3,12 @@
 out/
 *.iml
 .project
+.classpath
+manifest.mf
+build.xml
 nbproject/
 build/
+dist/
 bin/
 
 # ignoring compiled files

@@ -1,4 +1,4 @@
-package models.value;
+package util;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -68,5 +68,15 @@ public class TokensInformation {
     public HashSet<Character> split() {
         return new HashSet<>(Arrays.asList('(', ')', '[', ']', '{', ',', '.', ';', ':', '}',
                 '?', '*', '+', '-', '=', '\'', '\\', '/', '&', '|', '!', '>', '<'));
+    }
+
+    public HashMap<TokenType, HashSet<String>> allTokens() {
+        HashMap<TokenType, HashSet<String>> tokenHash = new HashMap<>();
+        tokenHash.put(TokenType.RESERVED, this.reservedWords());
+        tokenHash.put(TokenType.DELIMITER, this.delimiters());
+        tokenHash.put(TokenType.RELATIONAL, this.relationalOperators());
+        tokenHash.put(TokenType.LOGIC, this.logicOperators());
+        tokenHash.put(TokenType.ARITHMETIC, this.arithmeticOperators());
+        return tokenHash;
     }
 }

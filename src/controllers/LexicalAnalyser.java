@@ -4,10 +4,12 @@ import models.business.FileManager;
 import models.value.Lexeme;
 import models.value.ParseErrors;
 import models.value.Token;
-import models.value.TokensInformation;
+import util.TokenType;
+import util.TokensInformation;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,20 +33,16 @@ public class LexicalAnalyser {
 
     Token analyse(Lexeme lexeme) {
         String token = lexeme.getValue();
-        if (TokensInformation.getInstance().reservedWords().contains(token)) {
-            return new Token(lexeme.getValue(), "reserved", lexeme);
-        } else if (TokensInformation.getInstance().delimiters().contains(token)) {
-            return new Token(lexeme.getValue(), "delimiter", lexeme);
-        } else if (TokensInformation.getInstance().relationalOperators().contains(token)) {
-            return new Token(lexeme.getValue(), "relational", lexeme);
-        } else if (TokensInformation.getInstance().logicOperators().contains(token)) {
-            return new Token(lexeme.getValue(), "logic", lexeme);
-        } else if (TokensInformation.getInstance().arithmeticOperators().contains(token)) {
-            return new Token(lexeme.getValue(), "arithmetic", lexeme);
-        } else if (token.matches("(-)?\\s*[0-9]([0-9]*\\.?[0-9]+)?")) {  /*verify if the number is correct*/
-            return new Token(lexeme.getValue(), "number", lexeme);
+        HashMap<TokenType, HashSet<String>> predefinedTokens = TokensInformation.getInstance().allTokens();
+        for (TokenType tokenType : predefinedTokens.keySet()) {
+            if (predefinedTokens.get(tokenType).contains(token)) {
+                return new Token(tokenType, lexeme);
+            }
+        }
+        if (token.matches("(-)?\\s*[0-9]([0-9]*\\.?[0-9]+)?")) {  /*verify if the number is correct*/
+            return new Token(TokenType.NUMBER, lexeme);
         } else if (token.matches("[_]?(([a-z]|[A-Z]|_)+[0-9]*)+(([a-z]|[A-Z]|[0-9]|_)*)*")) {
-            return new Token(lexeme.getValue(), "identifier", lexeme);  /*verify if the identifier is correct*/
+            return new Token(TokenType.IDENTIFIER, lexeme);  /*verify if the identifier is correct*/
         } else if (token.matches("\"(.)*\"")) {  /*verify if the string is correct*/
             boolean validCharacters = true;
             for (int index = 1; index < lexeme.getValue().length() - 1; index += 1) {
@@ -54,10 +52,10 @@ public class LexicalAnalyser {
                 }
             }
             if (validCharacters) {
-                return new Token(lexeme.getValue(), "string", lexeme);
+                return new Token(TokenType.STRING, lexeme);
             }
         } else if (token.matches("/\\*(.|\\n)*\\*/") || token.matches("//.*")) {
-            return new Token(lexeme.getValue(), "comment", lexeme); /*verify if comment is correct*/
+            return new Token(TokenType.COMMENT, lexeme); /*verify if comment is correct*/
         }
 
         return null;
@@ -177,7 +175,7 @@ public class LexicalAnalyser {
                 this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "String not closed", lexeme));
                 openString = false;
                 currentLexeme = new StringBuilder();
-            } else if(openComment == 2){
+            } else if (openComment == 2) {
                 currentLexeme.append('\n');
             }
             lineCounter += 1;
