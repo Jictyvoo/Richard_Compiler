@@ -104,9 +104,9 @@ public class LexicalAnalyser {
                 }
                 if (!openString && ((previous == '/' && (character == '*' || character == '/')) || openComment > 0)) {
                     currentLexeme.append(character);    /*Here is the verification for comments*/
-                    if (previous == '/' && character == '/') {
+                    if (openComment == 0 && character == '/') {
                         openComment = 1;
-                    } else if (previous == '/' && character == '*') {
+                    } else if (openComment == 0) {
                         openComment = 2;
                     } else if (openComment == 2 && (previous == '*' && character == '/')) {
                         openComment = 0;
