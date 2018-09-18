@@ -2,7 +2,6 @@ package models.business;
 
 import java.io.*;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.io.File;
 
 public class FileManager implements Iterable<String> {

@@ -15,7 +15,7 @@ public class RichardMain {
             String[] filesName = new FileManager().filesName("teste");
             
             for(String s : filesName){
-                System.out.println("File: " + s +"\n"); //test
+                System.out.println("File: "+s); //test
                 lexicalAnalyser.parse(s);
 
                 for (List<Token> tokens : lexicalAnalyser.getTokenList().values()) {
