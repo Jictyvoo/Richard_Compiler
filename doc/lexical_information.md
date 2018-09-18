@@ -1,13 +1,8 @@
-# Richard Compiler
+# Lexical Information
 
-A compiler for Richard Language written in Java for EXA 817 discipline
+Here is a Lexical Information
 
-## Team
-
-* Eduardo Marques
-* João Victor Olveira Couto
-
-## Grammar
+## Lexical Table
 
 Here is the grammar for the language, with all symbols accepted by the language
 

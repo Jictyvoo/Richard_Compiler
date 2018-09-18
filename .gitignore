@@ -13,3 +13,4 @@ bin/
 
 # ignoring compiled files
 *.class
+output/

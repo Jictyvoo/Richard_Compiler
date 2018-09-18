@@ -188,6 +188,7 @@ public class LexicalAnalyser {
         } else if (nextLexeme.length() > 0) {
             this.verifyToken(this.tokenList.get(filename), nextLexeme, "", lineCounter - 1, column, filename);
         }
+        fileManager.destroy();
         return this.tokenList.get(filename);
     }
 
