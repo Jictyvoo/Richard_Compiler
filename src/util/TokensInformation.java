@@ -18,26 +18,26 @@ public class TokensInformation {
         return instance;
     }
 
-    public HashSet<String> reservedWords() {
+    private HashSet<String> reservedWords() {
         return new HashSet<>(Arrays.asList(
                 "class", "const", "variables", "method", "return", "main", "if", "then", "else", "while", "read",
                 "write", "void", "int", "float", "bool", "string", "true", "false", "extends"
         ));
     }
 
-    public HashSet<String> delimiters() {
+    private HashSet<String> delimiters() {
         return new HashSet<>(Arrays.asList(";", ",", "(", ")", "[", "]", "{", "}", "."));
     }
 
-    public HashSet<String> relationalOperators() {
+    private HashSet<String> relationalOperators() {
         return new HashSet<>(Arrays.asList("!=", "==", "<", "<=", ">", ">=", "="));
     }
 
-    public HashSet<String> logicOperators() {
+    private HashSet<String> logicOperators() {
         return new HashSet<>(Arrays.asList("!", "&&", "||"));
     }
 
-    public HashSet<String> arithmeticOperators() {
+    private HashSet<String> arithmeticOperators() {
         return new HashSet<>(Arrays.asList("+", "-", "*", "/", "++", "--"));
     }
 
