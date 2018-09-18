@@ -2,9 +2,11 @@ package models.business;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.io.File;
 
 public class FileManager implements Iterable<String> {
-
+    
     private File file;
     private FileReader fileReader;
 
@@ -13,6 +15,9 @@ public class FileManager implements Iterable<String> {
         this.fileReader = new FileReader(this.file);
     }
 
+    public FileManager() {
+    }
+    
     @Override
     public Iterator<String> iterator() {
         return new Iterator<String>() {
@@ -66,6 +71,18 @@ public class FileManager implements Iterable<String> {
         };
     }
 
+    public static String[] filesName(String root){
+        String[] filesName;
+        File dir = new File(root);
+        
+        if (dir.isDirectory()) {
+            filesName = dir.list();
+            return filesName;
+        }
+        
+        return null;
+    }
+    
     public void destroy() {
         this.fileReader = null;
         this.file = null;
