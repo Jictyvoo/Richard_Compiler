@@ -6,6 +6,7 @@ import models.value.ParseErrors;
 import models.value.Token;
 import util.TokenType;
 import util.TokensInformation;
+import util.exception.FileNotExistsException;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -75,7 +76,7 @@ public class LexicalAnalyser {
         return new StringBuilder();
     }
 
-    public List<Token> parse(String filename) throws FileNotFoundException {
+    public List<Token> parse(String filename) throws FileNotFoundException, FileNotExistsException {
         FileManager fileManager = new FileManager(filename);
         if (!this.parseErrors.containsKey(filename)) {
             this.parseErrors.put(filename, new LinkedList<>());

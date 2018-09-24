@@ -1,5 +1,7 @@
 package models.business;
 
+import util.exception.FileNotExistsException;
+
 import java.io.*;
 import java.util.Iterator;
 import java.io.File;
@@ -9,8 +11,11 @@ public class FileManager implements Iterable<String> {
     private File file;
     private FileReader fileReader;
 
-    public FileManager(String filename) throws FileNotFoundException {
+    public FileManager(String filename) throws FileNotFoundException, FileNotExistsException {
         this.file = new File(filename);
+        if (!this.file.exists()) {
+            throw new FileNotExistsException("File " + filename + " Not Exists");
+        }
         if (file.isFile()) {
             this.fileReader = new FileReader(this.file);
         }

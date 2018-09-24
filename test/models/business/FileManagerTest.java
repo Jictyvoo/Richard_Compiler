@@ -1,6 +1,7 @@
 package models.business;
 
 import org.junit.jupiter.api.Test;
+import util.exception.FileNotExistsException;
 
 import java.io.FileNotFoundException;
 
@@ -22,6 +23,8 @@ class FileManagerTest {
             assert (counter == line.length());
         } catch (FileNotFoundException e) {
             assertFalse(true);
+        } catch (FileNotExistsException e) {
+            e.printStackTrace();
         }
     }
 }
