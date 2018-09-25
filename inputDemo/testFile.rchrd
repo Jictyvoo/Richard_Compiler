@@ -41,21 +41,3 @@ class RichardTestFile {
         string hello = "\"\"Hello World\"\"";
     }
 }
-
-/*Here will begin errors*/
-
-Will not start comment block */
-
-$notExist = []array @
-
-myLittleFloat++-----; //need to fix error when closing string and line became a new line
-
-"This is a string error /*My comment in a string*/
-
-int number = 45.abc;
-string thing......;
-
-int errorNumber = 32.12.543.53;
-string errorIdentifier = 99ys7a;
-
-/* Here is a comment not closed
