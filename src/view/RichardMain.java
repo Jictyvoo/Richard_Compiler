@@ -2,6 +2,7 @@ package view;
 
 import controllers.LexicalAnalyser;
 import models.business.FileManager;
+import models.business.LambdaFunctions;
 import models.value.ParseErrors;
 import models.value.Token;
 import util.exception.FileNotExistsException;
@@ -11,6 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class RichardMain {
 
