@@ -3,13 +3,12 @@ package util;
 import models.value.Token;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Queue;
 
 public abstract class ChainedCall {
 
-    private List<Token> tokenList;
-    private Map<String, Token> tokenMap;
+    private Queue<Token> tokenList;
+    private SyntheticNode tokenNode;
     protected HashMap<String, Production> functions;
 
     public ChainedCall() {
@@ -17,26 +16,26 @@ public abstract class ChainedCall {
         this.functions = new HashMap<>();
     }
 
-    public ChainedCall call(String productionName, List<Token> tokenList) {
+    protected ChainedCall call(String productionName, Queue<Token> tokenList) {
         this.tokenList = tokenList;
-        this.tokenMap = null;
+        this.tokenNode = null;
         if (this.functions.containsKey(productionName)) {
-            this.tokenMap = this.functions.get(productionName).run(tokenList);
+            this.tokenNode = this.functions.get(productionName).run(tokenList);
         }
         return this;
     }
 
     public ChainedCall call(String productionName) {
-        if (this.tokenMap == null && this.tokenList != null && this.functions.containsKey(productionName)) {
-            Map<String, Token> map = this.functions.get(productionName).run(tokenList);
+        if (this.tokenNode == null && this.tokenList != null && this.functions.containsKey(productionName)) {
+            SyntheticNode map = this.functions.get(productionName).run(tokenList);
             if (map != null) {
-                this.tokenMap = map;
+                this.tokenNode = map;
             }
         }
         return this;
     }
 
-    public Map<String, Token> getTokenMap() {
-        return tokenMap;
+    public SyntheticNode getTokenNode() {
+        return tokenNode;
     }
 }
