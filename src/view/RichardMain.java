@@ -1,8 +1,8 @@
 package view;
 
 import controllers.LexicalAnalyser;
+import controllers.SynthaticAnalyser;
 import models.business.FileManager;
-import models.business.LambdaFunctions;
 import models.value.ParseErrors;
 import models.value.Token;
 import util.exception.FileNotExistsException;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Queue;
 
 public class RichardMain {
 
@@ -55,6 +55,7 @@ public class RichardMain {
             makeDirectories(rootPath);
             LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance();
             for (String filename : lexicalAnalyser.getTokenList().keySet()) {
+                System.out.println(SynthaticAnalyser.getInstance().start((LinkedList<Token>)lexicalAnalyser.getTokenList().get(filename)));
                 String newFilename = filename.replace(rootPath, "output/");
                 try {
                     //noinspection ResultOfMethodCallIgnored

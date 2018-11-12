@@ -76,6 +76,15 @@ public class LexicalAnalyser {
         return new StringBuilder();
     }
 
+    private boolean onlyNumber(String toTest) {
+        for (char character : toTest.toCharArray()) {
+            if (character <= '0' || character >= '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public List<Token> parse(String filename) throws FileNotFoundException, FileNotExistsException {
         FileManager fileManager = new FileManager(filename);
         if (!this.parseErrors.containsKey(filename)) {
@@ -136,7 +145,7 @@ public class LexicalAnalyser {
                 } else if (character == 9 || character == 32) { /*verify spaces to break words*/
                     completedLexeme = true;
                 } else if (TokensInformation.getInstance().split().contains(character)) {   /*Here will start token split*/
-                    if (((previous >= '0' && previous <= '9') && character == '.')) {
+                    if (((previous >= '0' && previous <= '9') && character == '.') && this.onlyNumber(currentLexeme.toString())) {
                         currentLexeme.append(character);
                     } else {
                         completedLexeme = true; /*if contains a split character, complete previous lexeme*/

@@ -1,32 +1,32 @@
-package models.business;
+package controllers;
 
 import models.value.Token;
 import util.ChainedCall;
-import util.SyntheticNode;
+import util.SynthaticNode;
 import util.TokenType;
 
 import java.util.Queue;
 
-public class LambdaFunctions extends ChainedCall {
+public class SynthaticAnalyser extends ChainedCall {
 
-    private static LambdaFunctions instance;
+    private static SynthaticAnalyser instance;
 
-    private LambdaFunctions() {
+    private SynthaticAnalyser() {
         super();
         this.functions.put("Identifier", tokens -> {
             Token token = tokens.peek();
             if (token != null && token.getType() == TokenType.IDENTIFIER) {
-                return new SyntheticNode(tokens.remove());
+                return new SynthaticNode(tokens.remove());
             }
             return null;
         });
         this.functions.put("Program", tokens -> {
             while (tokens.size() > 0) {
-                SyntheticNode tokenMap = this.call("Class", tokens).call("Constants").getTokenNode();
+                SynthaticNode tokenMap = this.call("Class", tokens).call("Constants").getTokenNode();
                 if (tokenMap == null) {
                     tokens.remove();
                 } else {
-                    SyntheticNode map = this.call("Program", tokens).getTokenNode();
+                    SynthaticNode map = this.call("Program", tokens).getTokenNode();
                     if (map != null) {
                         tokenMap.add(map);
                     }
@@ -39,7 +39,7 @@ public class LambdaFunctions extends ChainedCall {
             Token token = tokens.peek();
             if (token != null) {
                 if ("class".equals(token.getLexeme().getValue())) {
-                    SyntheticNode node = new SyntheticNode(tokens.remove());
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
                     node.add(this.call("Identifier", tokens).getTokenNode());
                     node.add(this.call("Class Code", tokens).getTokenNode());
                     return node;
@@ -52,15 +52,15 @@ public class LambdaFunctions extends ChainedCall {
         });
     }
 
-    public static LambdaFunctions getInstance() {
+    public static SynthaticAnalyser getInstance() {
         if (instance == null) {
-            instance = new LambdaFunctions();
+            instance = new SynthaticAnalyser();
         }
         return instance;
     }
 
-    public SyntheticNode start(Queue<Token> queue) {
-        return this.call("Program", queue).getTokenNode();
+    public SynthaticNode start(Queue<Token> queue) {
+        return this.functions.get("Program").run(queue);
     }
 
 }

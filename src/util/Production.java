@@ -5,5 +5,5 @@ import models.value.Token;
 import java.util.Queue;
 
 public interface Production {
-    SyntheticNode run(Queue<Token> tokens);
+    SynthaticNode run(Queue<Token> tokens);
 }
