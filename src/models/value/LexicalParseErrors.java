@@ -1,11 +1,11 @@
 package models.value;
 
-public class ParseErrors {
+public class LexicalParseErrors {
     private String type;
     private String error;
     private Lexeme lexeme;
 
-    public ParseErrors(String type, String error, Lexeme lexeme) {
+    public LexicalParseErrors(String type, String error, Lexeme lexeme) {
         this.type = type;
         this.error = error;
         this.lexeme = lexeme;

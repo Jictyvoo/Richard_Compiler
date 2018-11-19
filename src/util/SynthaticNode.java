@@ -14,6 +14,11 @@ public class SynthaticNode {
         this.token = token;
     }
 
+    public SynthaticNode() {
+        this.nodeList = new ArrayList<>();
+        this.token = null;
+    }
+
     public void add(SynthaticNode synthaticNode) {
         if (synthaticNode != null) {
             this.nodeList.add(synthaticNode);
@@ -26,5 +31,9 @@ public class SynthaticNode {
 
     public List<SynthaticNode> getNodeList() {
         return nodeList;
+    }
+
+    public boolean isEmpty() {
+        return this.nodeList.isEmpty();
     }
 }

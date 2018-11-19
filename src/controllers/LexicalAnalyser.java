@@ -2,7 +2,7 @@ package controllers;
 
 import models.business.FileManager;
 import models.value.Lexeme;
-import models.value.ParseErrors;
+import models.value.LexicalParseErrors;
 import models.value.Token;
 import util.TokenType;
 import util.TokensInformation;
@@ -17,7 +17,7 @@ import java.util.List;
 public class LexicalAnalyser {
 
     private static LexicalAnalyser instance = null;
-    private HashMap<String, List<ParseErrors>> parseErrors;
+    private HashMap<String, List<LexicalParseErrors>> parseErrors;
     private HashMap<String, List<Token>> tokenList;
 
     private LexicalAnalyser() {
@@ -70,7 +70,7 @@ public class LexicalAnalyser {
             if (generatedToken != null) {
                 tokenList.add(generatedToken);
             } else {
-                this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "Unrecognized Token", lexeme));
+                this.parseErrors.get(filename).add(new LexicalParseErrors("Lexical Error", "Unrecognized Token", lexeme));
             }
         }
         return new StringBuilder();
@@ -128,7 +128,7 @@ public class LexicalAnalyser {
                 } else if (!openString && previous == '*' && character == '/') {    /*only to verify if has a unopened comment*/
                     currentLexeme.append(character);
                     Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, column, filename);
-                    this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "Comment not opened", lexeme));
+                    this.parseErrors.get(filename).add(new LexicalParseErrors("Lexical Error", "Comment not opened", lexeme));
                     currentLexeme = new StringBuilder();
                 } else if (character == '\"' || openString) {  /*start of string verification*/
                     if (!openString && previous != '\\') {  /*if string was not open and " was not followed by slash*/
@@ -182,7 +182,7 @@ public class LexicalAnalyser {
             }
             if (openString) {
                 Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, column, filename);
-                this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "String not closed", lexeme));
+                this.parseErrors.get(filename).add(new LexicalParseErrors("Lexical Error", "String not closed", lexeme));
                 openString = false;
                 currentLexeme = new StringBuilder();
             } else if (openComment == 2) {
@@ -192,7 +192,7 @@ public class LexicalAnalyser {
         }
         if (openComment > 0) {
             Lexeme lexeme = new Lexeme(currentLexeme.toString(), "", lineCounter, column, filename);
-            this.parseErrors.get(filename).add(new ParseErrors("Lexical Error", "Comment not closed", lexeme));
+            this.parseErrors.get(filename).add(new LexicalParseErrors("Lexical Error", "Comment not closed", lexeme));
         } else if (currentLexeme.length() > 0) {
             this.verifyToken(this.tokenList.get(filename), currentLexeme, "", lineCounter - 1, column, filename);
         } else if (nextLexeme.length() > 0) {
@@ -202,7 +202,7 @@ public class LexicalAnalyser {
         return this.tokenList.get(filename);
     }
 
-    public HashMap<String, List<ParseErrors>> getParseErrors() {
+    public HashMap<String, List<LexicalParseErrors>> getParseErrors() {
         return this.parseErrors;
     }
 

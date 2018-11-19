@@ -19,7 +19,7 @@ public abstract class ChainedCall {
         this.first = FirstFollow.getInstance().getFirst();
     }
 
-    private boolean predict(String productionName, Token token) {   /*Something is wrong with predict*/
+    protected boolean predict(String productionName, Token token) {   /*Something is wrong with predict*/
         if (token != null) {
             if (this.first.get(productionName) != null) {
                 return this.first.get(productionName).contains(token.getLexeme().getValue());
