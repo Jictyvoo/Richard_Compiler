@@ -1,5 +1,7 @@
 package view;
 
+//Authors: João Victor & Eduardo Marques
+
 import controllers.LexicalAnalyser;
 import controllers.SynthaticAnalyser;
 import models.business.FileManager;
@@ -18,9 +20,11 @@ public class RichardMain {
 
     private static ArrayList<String> allPaths = new ArrayList<>();
 
+    //Method that read the project's root folder
     private static void readDirectory(String path) throws FileNotExistsException {
-        allPaths.add(path);
-        LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance();
+        allPaths.add(path); //Add directory an list
+        LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance(); //Received instance of lexical analyser
+        //Performs directory reading
         try {
             FileManager fileManager = new FileManager(path);
             for (String filename : fileManager) {
@@ -38,6 +42,7 @@ public class RichardMain {
         }
     }
 
+    //Create output directories
     private static void makeDirectories(String rootPath) {
         for (String path : allPaths) {
             path = path.replace(rootPath, "output/");
@@ -50,11 +55,16 @@ public class RichardMain {
     public static void main(String... args) {
         String rootPath = args.length > 0 ? args[0] : "src/";
         try {
-            readDirectory(rootPath);
-            makeDirectories(rootPath);
-            LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance();
+            readDirectory(rootPath); //Performs directory reading
+            makeDirectories(rootPath); //Create output directories
+            LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance(); //Receives lexical parser instance
+            
+            
             for (String filename : lexicalAnalyser.getTokenList().keySet()) {
-                System.out.println(SynthaticAnalyser.getInstance().startAutomatic((LinkedList<Token>)lexicalAnalyser.getTokenList().get(filename)));
+                //System.out.println(SynthaticAnalyser.getInstance().startAutomatic((LinkedList<Token>)lexicalAnalyser.getTokenList().get(filename)));
+                //Show derivation
+                SynthaticAnalyser.getInstance().showDerivation(SynthaticAnalyser.getInstance().startAutomatic((LinkedList<Token>)lexicalAnalyser.getTokenList().get(filename)));
+                
                 String newFilename = filename.replace(rootPath, "output/");
                 try {
                     //noinspection ResultOfMethodCallIgnored
