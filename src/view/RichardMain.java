@@ -63,8 +63,9 @@ public class RichardMain {
             for (String filename : lexicalAnalyser.getTokenList().keySet()) {
                 //System.out.println(SynthaticAnalyser.getInstance().startAutomatic((LinkedList<Token>)lexicalAnalyser.getTokenList().get(filename)));
                 //Show derivation
-                SynthaticAnalyser.getInstance().showDerivation(SynthaticAnalyser.getInstance().startAutomatic((LinkedList<Token>)lexicalAnalyser.getTokenList().get(filename)));
+                SynthaticAnalyser.getInstance().showDerivation(SynthaticAnalyser.getInstance().start((LinkedList<Token>)lexicalAnalyser.getTokenList().get(filename)));
                 
+                //Create output directory
                 String newFilename = filename.replace(rootPath, "output/");
                 try {
                     //noinspection ResultOfMethodCallIgnored
@@ -73,6 +74,8 @@ public class RichardMain {
                     for (Token token : lexicalAnalyser.getTokenList().get(filename)) {
                         writer.println(token.toString());
                     }
+                    
+                    //Syntax analyzer output
                     if (lexicalAnalyser.getParseErrors().get(filename).isEmpty()) {
                         writer.println("\n\nSuccess, all lexical analyse defined your code fine!");
                     } else {

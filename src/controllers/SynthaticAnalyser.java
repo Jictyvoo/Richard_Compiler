@@ -134,9 +134,7 @@ public class SynthaticAnalyser extends ChainedCall {
     
     public void showDerivation(SynthaticNode node){
         if (node != null) {
-            System.out.println(node.getToken().toString());
-        }else{
-            System.out.println("Empty");
+            System.out.println(node.getToken());
         }
     }
 
