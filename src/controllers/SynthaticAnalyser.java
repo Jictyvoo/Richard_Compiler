@@ -93,6 +93,12 @@ public class SynthaticAnalyser extends ChainedCall {
                         }
                     } else if (count >= 1) {
                         hasError = true;
+                        Token consume = queue.peek();
+                        while (consume != null && !FirstFollow.getInstance().getFollow().get(derivation.replaceAll("[<|>]", "")).contains(consume.getLexeme().getValue())) {
+                            /*System.out.println("Consumed " + derivation + "__> " + queue.remove());*/
+                            queue.remove();
+                            consume = queue.peek();
+                        }
                     }
                     if (hasError) {
                         Token token = queue.peek();
@@ -102,7 +108,10 @@ public class SynthaticAnalyser extends ChainedCall {
                 } else {
                     Token token = queue.peek();
                     if (token != null) {
+                        /*treatment to errors in identifier and other types*/
                         if (token.getLexeme().getValue().equals(derivation.replace("\'", ""))) {
+                            hasConsumed.add(new SynthaticNode(queue.remove()));
+                        } else if (this.predict(derivation.replace("\'", ""), token)) {
                             hasConsumed.add(new SynthaticNode(queue.remove()));
                         }
                     }
@@ -131,10 +140,10 @@ public class SynthaticAnalyser extends ChainedCall {
         }
         return null;
     }
-    
-    public void showDerivation(SynthaticNode node){
+
+    public void showDerivation(SynthaticNode node) {
         if (node != null) {
-            System.out.println(node.getToken());
+            System.out.println(node.getToken() != null ? node.getToken() : "Empty");
         }
     }
 

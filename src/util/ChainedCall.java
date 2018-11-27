@@ -22,7 +22,11 @@ public abstract class ChainedCall {
     protected boolean predict(String productionName, Token token) {   /*Something is wrong with predict*/
         if (token != null) {
             if (this.first.get(productionName) != null) {
-                return this.first.get(productionName).contains(token.getLexeme().getValue());
+                return this.first.get(productionName).contains(token.getLexeme().getValue())
+                        || (TokenType.IDENTIFIER == token.getType() && this.first.get(productionName).contains("Identifier"))
+                        || (TokenType.NUMBER == token.getType() && this.first.get(productionName).contains("NumberTerminal"))
+                        || (TokenType.STRING == token.getType() && this.first.get(productionName).contains("StringLiteral"))
+                        || (this.first.get(productionName).contains(""));
             } else if ("NumberTerminal".equals(productionName) && token.getType() == TokenType.NUMBER) {
                 return true;
             } else if ("Identifier".equals(productionName) && token.getType() == TokenType.IDENTIFIER) {

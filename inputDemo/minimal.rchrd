@@ -1,0 +1,31 @@
+const {
+    int CONSTANT = 1 - 2;
+}
+
+class Pokemon{
+
+    variables {
+        int life[2] = {(12, 12)}, iv[4] = {(10, 21, 7, 19)};
+        int peso = 75;
+        string name;
+        float pronto = cuscuz.statusCuscuz();
+    
+        int vetor[2] = {(1, v.value())};
+        int array[] = v.newVector();
+    }
+    
+    method void tasmanianDevil(){
+        if((12 > 10) && true)then{
+            read(Taz_Loucao, d.f, h.e); 
+            if(v.v()) then{
+                read(masoq);
+                a = 2;
+            }
+            write(Taz_Loucao, d.f);
+        } else if(v.v())then{
+            read(masoq);
+        } else {
+            write(masoq);
+        }
+    }
+}
