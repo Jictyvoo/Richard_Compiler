@@ -11,7 +11,6 @@ public class SynthaticNode {
 
     public SynthaticNode(Token token) {
         this.nodeList = new ArrayList<>();
-        System.out.println(token);
         this.token = token;
     }
 

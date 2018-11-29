@@ -10,13 +10,15 @@ public abstract class ChainedCall {
 
     private Queue<Token> tokenList;
     private SynthaticNode tokenNode;
-    private HashMap<String, HashSet<String>> first;
+    protected HashMap<String, HashSet<String>> first;
+    protected HashMap<String, HashSet<String>> follow;
     protected HashMap<String, Production> functions;
 
     public ChainedCall() {
         this.tokenList = null;
         this.functions = new HashMap<>();
         this.first = FirstFollow.getInstance().getFirst();
+        this.follow = FirstFollow.getInstance().getFollow();
     }
 
     protected boolean predict(String productionName, Token token) {   /*Something is wrong with predict*/

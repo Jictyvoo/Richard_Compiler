@@ -1,11 +1,7 @@
-# Grammar
-
-Here is the complete syntax of Richard in BNF.
-
-```html
 "Name"           = 'RICHARD'
 "Author"         = 'João Victor, Eduardo Marques, Gustavo Henrique, Marcos Aldrey, Marcos Vinicius, Alyson, Alisson, André, Gilvaney, Nielson, Lucas Cardoso'
-"Version"        = 'v0.1
+"Version"        = 'The version of the grammar and/or language'
+"About"          = 'A short description of the grammar'
 "Case Sensitive" = 'True'
 
 "Start Symbol"   = <Program>
@@ -30,10 +26,14 @@ NumberTerminal       = {Number}+('.'{Number}+)?
 
 ! The grammar starts below
 <Program>                     ::= <Class> <Program> | <Constants> <Program> |
-                               
-<Expr Arit>                   ::= <Mult Exp> '+' <Expression> | <Mult Exp> '-' <Expression> | <Mult Exp>
+
+<Arithmetic>                  ::= '+' <Expression> | '-' <Expression> |
+
+<Expr Arit>                   ::= <Mult Exp> <Arithmetic>
+
+<Multiple>                    ::= '*' <Expression> | '/' <Expression> |
                         
-<Mult Exp>                    ::= <Negate Exp> '*' <Expression> | <Negate Exp> '/' <Expression> | <Negate Exp>
+<Mult Exp>                    ::= <Negate Exp> <Multiple>
                         
 <Expression>                  ::= '(' <Expr Arit> ')' | <Expr Arit>
                         
@@ -47,7 +47,7 @@ NumberTerminal       = {Number}+('.'{Number}+)?
 
 <Relational Logic>            ::= <Relational Operator> <Condition> | <Logic Operator> <Condition> |
 
-<Condition>                   ::= <Negate> <Expression> <Relational Logic> | '(' <Condition> ')' <Relational Logic>
+<Condition>                   ::= '(' <Condition> ')' <Relational Logic> | <Negate> <Expression> <Relational Logic>
 
 !Add more values to the rule below - as needed
 
@@ -68,16 +68,20 @@ NumberTerminal       = {Number}+('.'{Number}+)?
 <Valid Identifier>            ::= Identifier <Array>
 
 <Type>                        ::= 'string' | 'int' | 'float' | 'bool' | 'void' | Identifier
-                        
-<Attribute Access>            ::= '.' <Valid Identifier> <Attribute Access> |
 
-<Valid Values>                ::= <Value> | <Valid Identifier> <Attribute Access>
+<Identifier With Attributes>  ::= <Valid Identifier> <Attribute Access>
                         
-<Initial Value>               ::= <Init Array> | <Valid Values> <Increment-Decrement> | <Method Call>
+<Attribute Access>            ::= '.' <Identifier With Attributes> |
+
+<Call Arguments>              ::= '(' <Arguments> ')' |
+
+<Valid Values>                ::= <Value> | <Identifier With Attributes> <Call Arguments>
+                        
+<Method Call>                 ::= <Identifier With Attributes> '(' <Arguments> ')'
+                        
+<Initial Value>               ::= <Init Array> | <Valid Values> <Increment-Decrement>
                                
 <Increment-Decrement>         ::= '++' <Increment-Decrement> | '--' <Increment-Decrement> |
-                        
-<Method Call>                 ::= <Valid Identifier> <Attribute Access> '(' <Arguments> ')'
 
 <Multiple Identifier>         ::= ',' <Valid Identifier> <Multiple Identifier> |
 
@@ -120,7 +124,9 @@ NumberTerminal       = {Number}+('.'{Number}+)?
                                
 <Attributition>               ::= '=' <Expression> | <Increment-Decrement>
 
-<Line Code>                   ::= 'return' <Return Statement> | <Method Call> | <Read> | <Write> | <Valid Identifier> <Attribute Access> <Attributition>
+<Execute Line>                ::= <Call Arguments> | <Attributition>
+
+<Line Code>                   ::= 'return' <Return Statement> | <Read> | <Write> | <Identifier With Attributes> <Execute Line>
                         
 <If-Block>                    ::= 'if' '(' <Condition> ')' 'then' <Code Block> <Else-Block>
                        
@@ -139,4 +145,3 @@ NumberTerminal       = {Number}+('.'{Number}+)?
 <To-Write>                    ::= ',' <Valid Values> <To-Write> | ',' <Method Call> <To-Write> |
 
 <Write Parameters>            ::= <Valid Values> <To-Write> | <Method Call> <To-Write>
-```

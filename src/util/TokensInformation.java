@@ -25,7 +25,7 @@ public class TokensInformation {
         ));
     }
 
-    private HashSet<String> delimiters() {
+    public HashSet<String> delimiters() {
         return new HashSet<>(Arrays.asList(";", ",", "(", ")", "[", "]", "{", "}", "."));
     }
 

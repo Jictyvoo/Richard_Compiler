@@ -7,6 +7,7 @@ import controllers.SynthaticAnalyser;
 import models.business.FileManager;
 import models.value.LexicalParseErrors;
 import models.value.Token;
+import util.SynthaticNode;
 import util.exception.FileNotExistsException;
 
 import java.io.File;
@@ -20,11 +21,11 @@ public class RichardMain {
 
     private static ArrayList<String> allPaths = new ArrayList<>();
 
-    //Method that read the project's root folder
+    /*Method that read the project's root folder*/
     private static void readDirectory(String path) throws FileNotExistsException {
         allPaths.add(path); //Add directory an list
         LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance(); //Received instance of lexical analyser
-        //Performs directory reading
+        /*Performs directory reading*/
         try {
             FileManager fileManager = new FileManager(path);
             for (String filename : fileManager) {
@@ -42,7 +43,7 @@ public class RichardMain {
         }
     }
 
-    //Create output directories
+    /*Create output directories*/
     private static void makeDirectories(String rootPath) {
         for (String path : allPaths) {
             path = path.replace(rootPath, "output/");
@@ -60,9 +61,6 @@ public class RichardMain {
             LexicalAnalyser lexicalAnalyser = LexicalAnalyser.getInstance(); //Receives lexical parser instance
 
             for (String filename : lexicalAnalyser.getTokenList().keySet()) {
-                /*Show derivation*/
-                SynthaticAnalyser.getInstance().showDerivation(SynthaticAnalyser.getInstance().startAutomatic((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename)));
-
                 /*Create output directory*/
                 String newFilename = filename.replace(rootPath, "output/");
                 try {
@@ -85,6 +83,10 @@ public class RichardMain {
                     writer.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                }
+                if (lexicalAnalyser.getParseErrors().get(filename).isEmpty()) {
+                    SynthaticNode node = SynthaticAnalyser.getInstance().startAutomatic((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
+                    SynthaticAnalyser.getInstance().showDerivation(node);
                 }
             }
         } catch (FileNotExistsException e) {

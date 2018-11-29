@@ -3,10 +3,7 @@ package controllers;
 import models.value.Lexeme;
 import models.value.SynthaticParseErrors;
 import models.value.Token;
-import util.ChainedCall;
-import util.FirstFollow;
-import util.SynthaticNode;
-import util.TokenType;
+import util.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,33 +74,43 @@ public class SynthaticAnalyser extends ChainedCall {
         return name.matches("<.*>");
     }
 
+    private boolean isSynchronizationToken(Token token, String derivation) {
+        return this.follow.get(derivation.replaceAll("[<|>]", "")).contains(token.getLexeme().getValue())
+                || TokensInformation.getInstance().delimiters().contains(token.getLexeme().getValue());
+    }
+
     private SynthaticNode automatic(String production, Queue<Token> queue) {
         for (List<String> produces : this.productions.get(production)) {
             SynthaticNode hasConsumed = new SynthaticNode();
             int count = 0;
             for (String derivation : produces) {
+                System.out.println("Entering Production: " + queue.peek() + " __" + production + " deriv." + derivation);
                 if (this.isProduction(derivation)) {
                     boolean hasError = false;
                     if (this.predict(derivation.replaceAll("[<|>]", ""), queue.peek())) {
                         SynthaticNode synthaticNode = this.automatic(derivation, queue);
                         if (synthaticNode != null) {
                             hasConsumed.add(synthaticNode);
-                        } else {
+                        } else if (!this.first.get(production.replaceAll("[<|>]", "")).contains("")) {
                             hasError = true;
                         }
                     } else if (count >= 1) {
                         hasError = true;
                         Token consume = queue.peek();
-                        while (consume != null && !FirstFollow.getInstance().getFollow().get(derivation.replaceAll("[<|>]", "")).contains(consume.getLexeme().getValue())) {
-                            /*System.out.println("Consumed " + derivation + "__> " + queue.remove());*/
-                            queue.remove();
+                        while (consume != null && !this.isSynchronizationToken(consume, derivation)) {
+                            System.out.println("Consumed " + derivation + "__> " + queue.remove() + " __" + production);
+                            //queue.remove();
                             consume = queue.peek();
+                        }
+                        if (queue.peek() != null) {
+                            queue.remove();
                         }
                     }
                     if (hasError) {
+                        System.out.println(production + " --> " + queue.peek() + " __" + derivation);
                         Token token = queue.peek();
                         Lexeme lexeme = token != null ? token.getLexeme() : null;
-                        this.errors.add(new SynthaticParseErrors(FirstFollow.getInstance().getFirst().get(derivation.replaceAll("[<|>]", "")), lexeme));
+                        this.errors.add(new SynthaticParseErrors(this.first.get(derivation.replaceAll("[<|>]", "")), lexeme));
                     }
                 } else {
                     Token token = queue.peek();
@@ -113,6 +120,10 @@ public class SynthaticAnalyser extends ChainedCall {
                             hasConsumed.add(new SynthaticNode(queue.remove()));
                         } else if (this.predict(derivation.replace("\'", ""), token)) {
                             hasConsumed.add(new SynthaticNode(queue.remove()));
+                        } else if ("".equals(derivation)) {
+                            hasConsumed.add(new SynthaticNode());
+                            count += 1;
+                            break;
                         }
                     }
                 }
@@ -132,7 +143,7 @@ public class SynthaticAnalyser extends ChainedCall {
 
     public SynthaticNode startAutomatic(Queue<Token> queue) {
         while (!queue.isEmpty()) {
-            SynthaticNode received = this.automatic("<Program>", queue);
+            SynthaticNode received = this.automatic(FirstFollow.getInstance().StartSymbol, queue);
             if (received != null) {
                 return received;
             }
@@ -143,7 +154,13 @@ public class SynthaticAnalyser extends ChainedCall {
 
     public void showDerivation(SynthaticNode node) {
         if (node != null) {
-            System.out.println(node.getToken() != null ? node.getToken() : "Empty");
+            if (node.getNodeList().isEmpty()) {
+                System.out.println(node.getToken() != null ? node.getToken() : "Empty");
+            } else {
+                for (SynthaticNode synthaticNode : node.getNodeList()) {
+                    this.showDerivation(synthaticNode);
+                }
+            }
         }
     }
 
