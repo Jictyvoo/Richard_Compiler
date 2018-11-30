@@ -20,6 +20,7 @@ public class SynthaticAnalyser extends ChainedCall {
         super();
         this.productions = FirstFollow.getInstance().getProductions();
         this.errors = new ArrayList<>();
+        
         this.functions.put("Identifier", tokens -> {
             Token token = tokens.peek();
             if (token != null && token.getType() == TokenType.IDENTIFIER) {
@@ -27,6 +28,7 @@ public class SynthaticAnalyser extends ChainedCall {
             }
             return null;
         });
+        
         this.functions.put("Program", tokens -> {
             while (tokens.size() > 0) {
                 SynthaticNode tokenMap = this.call("Class", tokens).call("Constants").getTokenNode();
@@ -42,6 +44,7 @@ public class SynthaticAnalyser extends ChainedCall {
             }
             return null;
         });
+        
         this.functions.put("Class", tokens -> {
             Token token = tokens.peek();
             if (token != null) {
@@ -54,9 +57,66 @@ public class SynthaticAnalyser extends ChainedCall {
             }
             return null;
         });
+        
+        this.functions.put("Constants", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if ("const".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Constant Assignment", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        
+        this.functions.put("Constant Assignment", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Declaration", tokens).getTokenNode());
+                node.add(this.call("Expression", tokens).getTokenNode());
+                node.add(this.call("Initialize Constant", tokens).getTokenNode());
+                node.add(this.call("Constant Assignment", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Declaration", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Type", tokens).getTokenNode());
+                node.add(this.call("Valid Identifier").getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Type", tokens -> {
+            Token token = tokens.peek();
+            if (token != null && token.getType() == TokenType.RESERVED) {
+                return new SynthaticNode(tokens.remove());
+            }
+            return null;
+        });
+        
+        this.functions.put("Expression", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Expr Arit", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+
         this.functions.put("Class Code", tokens -> {
             return null;
         });
+        
     }
 
     public static SynthaticAnalyser getInstance() {
@@ -163,5 +223,4 @@ public class SynthaticAnalyser extends ChainedCall {
             }
         }
     }
-
 }
