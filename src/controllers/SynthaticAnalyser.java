@@ -112,11 +112,159 @@ public class SynthaticAnalyser extends ChainedCall {
             }
             return null;
         });
-
-        this.functions.put("Class Code", tokens -> {
+        
+        this.functions.put("Expr Arit", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Mult Exp", tokens).getTokenNode());
+                node.add(this.call("Expression", tokens).getTokenNode());
+                return node;
+            }
             return null;
         });
         
+        this.functions.put("Mult Exp", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Negate Exp", tokens).getTokenNode());
+                node.add(this.call("Expression", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Negate Exp", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if("-".equals(token.getLexeme().getValue())){
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Initial Value", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Initial Value", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Init Array", tokens).getTokenNode());
+                node.add(this.call("Valid Values", tokens).getTokenNode());
+                node.add(this.call("Increment-Decrement", tokens).getTokenNode());
+                node.add(this.call("Mehotd Call", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Init Array", tokens -> {
+            Token token = tokens.remove();
+            if (token != null) {
+                if("{".equals(token.getLexeme().getValue())){
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Init Array_2", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Init Array_2", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if ("(".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Init Array_3", tokens).getTokenNode());
+                    node.add(this.call("Init Array_2", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Init Array_3", tokens -> {
+            Token token = tokens.remove();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Initial Value", tokens).getTokenNode());
+                node.add(this.call("Init Array_3", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Initialize Constant", tokens -> {
+            return null;
+        });
+
+        this.functions.put("Class Code", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Variables", tokens).getTokenNode());
+                node.add(this.call("Class Code", tokens).getTokenNode());
+                node.add(this.call("Methods", tokens).getTokenNode());
+                node.add(this.call("Class Code", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Variables", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if ("variables".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Variable Assignment", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Variable Assignment", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Declaration", tokens).getTokenNode());
+                node.add(this.call("Initialize", tokens).getTokenNode());
+                node.add(this.call("Initialize Variable", tokens).getTokenNode());
+                node.add(this.call("Variable Assignment", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Methods", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if ("method".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Declaration", tokens).getTokenNode());
+                    node.add(this.call("Parameters", tokens).getTokenNode());
+                    node.add(this.call("Code Block", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Code Block", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Code Statements", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Code Statements", tokens -> {
+            return null;
+        });
     }
 
     public static SynthaticAnalyser getInstance() {
