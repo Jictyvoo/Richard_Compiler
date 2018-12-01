@@ -2,7 +2,7 @@ const {
     int CONSTANT = 1 - 2;
 }
 
-class Pokemon{
+class Pokemon extends Pikachu{
 
     variables {
         int life[2] = {(12, 12)}, iv[4] = {(10, 21, 7, 19)};

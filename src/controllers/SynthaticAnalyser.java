@@ -92,7 +92,7 @@ public class SynthaticAnalyser extends ChainedCall {
             return null;
         });
         
-        /*END*/
+        /*END Terminals*/
         
         this.functions.put("Program", tokens -> {
             while (tokens.size() > 0) {
@@ -116,7 +116,20 @@ public class SynthaticAnalyser extends ChainedCall {
                 if ("class".equals(token.getLexeme().getValue())) {
                     SynthaticNode node = new SynthaticNode(tokens.remove());
                     node.add(this.call("Identifier", tokens).getTokenNode());
+                    node.add(this.call("Extends", tokens).getTokenNode());
                     node.add(this.call("Class Code", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Extends", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if ("extends".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Identifier", tokens).getTokenNode());
                     return node;
                 }
             }
@@ -175,8 +188,20 @@ public class SynthaticAnalyser extends ChainedCall {
             if (token != null) {
                 SynthaticNode node = new SynthaticNode(tokens.remove());
                 node.add(this.call("Mult Exp", tokens).getTokenNode());
-                node.add(this.call("Expression", tokens).getTokenNode());
+                node.add(this.call("Arithmetic", tokens).getTokenNode());
                 return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Arithmetic", tokens -> {
+            Token token = tokens.peek();
+            if (tokens != null) {
+                if ("+".equals(token.getLexeme().getValue()) || "-".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Expression", tokens).getTokenNode());
+                    return node;
+                }
             }
             return null;
         });
@@ -254,9 +279,17 @@ public class SynthaticAnalyser extends ChainedCall {
         });
         
         this.functions.put("Initialize Constant", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Multiple Identifier", tokens).getTokenNode());
+                node.add(this.call("Expression", tokens).getTokenNode());
+                node.add(this.call("Initialize Constant", tokens).getTokenNode());
+                return node;
+            }
             return null;
         });
-
+        
         this.functions.put("Class Code", tokens -> {
             Token token = tokens.peek();
             if (token != null) {
@@ -320,6 +353,28 @@ public class SynthaticAnalyser extends ChainedCall {
         });
         
         this.functions.put("Code Statements", tokens -> {
+            Token token = tokens.peek();
+            if(token != null){
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("If-Block", tokens).getTokenNode());
+                node.add(this.call("Code Statements", tokens).getTokenNode());
+                node.add(this.call("Looping-Block", tokens).getTokenNode());
+                node.add(this.call("Line Code", tokens).getTokenNode());
+                node.add(this.call("Variables", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+
+        this.functions.put("If-Block", tokens -> {
+            return null;
+        });
+        
+        this.functions.put("Looping-Block", tokens -> {
+            return null;
+        });
+        
+        this.functions.put("Line Code", tokens -> {
             return null;
         });
     }
