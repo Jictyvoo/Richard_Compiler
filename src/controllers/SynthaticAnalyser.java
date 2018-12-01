@@ -48,8 +48,14 @@ public class SynthaticAnalyser extends ChainedCall {
         
         this.functions.put("Type", tokens -> {
             Token token = tokens.peek();
-            if (token != null && token.getType() == TokenType.RESERVED) {
-                return new SynthaticNode(tokens.remove());
+            if (token != null) {
+                String value = token.getLexeme().getValue();
+                
+                if (value.equals("string") || value.equals("int") || value.equals("float") || value.equals("bool") || value.equals("void")) {
+                    return new SynthaticNode(tokens.remove());
+                }else if(token.getType() == TokenType.IDENTIFIER){
+                    return new SynthaticNode(tokens.remove());
+                }
             }
             return null;
         });
@@ -74,8 +80,10 @@ public class SynthaticAnalyser extends ChainedCall {
         
         this.functions.put("Logic Operator", tokens -> {
             Token token = tokens.peek();
-            if (token != null && token.getType() == TokenType.LOGIC) {
-                return new SynthaticNode(tokens.remove());
+            if (token != null) {
+                if(token.getType() == TokenType.LOGIC || !token.getLexeme().getValue().equals("!")){
+                    return new SynthaticNode(tokens.remove());
+                }
             }
             return null;
         });
@@ -323,6 +331,29 @@ public class SynthaticAnalyser extends ChainedCall {
                 node.add(this.call("Initialize", tokens).getTokenNode());
                 node.add(this.call("Initialize Variable", tokens).getTokenNode());
                 node.add(this.call("Variable Assignment", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Initialize", tokens -> {
+            Token token = tokens.remove();
+            if (token != null) {
+                if ("=".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Expression", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Initialize Variable", tokens -> {
+            Token token  = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Multiple Identifier", tokens).getTokenNode());
+                node.add(this.call("Initialize", tokens).getTokenNode());
                 return node;
             }
             return null;
