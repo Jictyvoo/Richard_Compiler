@@ -21,6 +21,7 @@ public class SynthaticAnalyser extends ChainedCall {
         this.productions = FirstFollow.getInstance().getProductions();
         this.errors = new ArrayList<>();
         
+        /*Connections for terminals that derive from non-terminals*/
         this.functions.put("Identifier", tokens -> {
             Token token = tokens.peek();
             if (token != null && token.getType() == TokenType.IDENTIFIER) {
@@ -28,6 +29,70 @@ public class SynthaticAnalyser extends ChainedCall {
             }
             return null;
         });
+        
+        this.functions.put("StringLiteral", tokens -> {
+            Token token = tokens.peek();
+            if (token != null && token.getType() == TokenType.STRING) {
+                return new SynthaticNode(tokens.remove());
+            }
+            return null;
+        });
+        
+        this.functions.put("NumberTerminal", tokens -> {
+            Token token = tokens.peek();
+            if (token != null && token.getType() == TokenType.NUMBER) {
+                return new SynthaticNode(tokens.remove());
+            }
+            return null;
+        });
+        
+        this.functions.put("Type", tokens -> {
+            Token token = tokens.peek();
+            if (token != null && token.getType() == TokenType.RESERVED) {
+                return new SynthaticNode(tokens.remove());
+            }
+            return null;
+        });
+        
+        this.functions.put("Value", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if (token.getType() == TokenType.STRING || token.getType() == TokenType.NUMBER || token.getType() == TokenType.RESERVED) {
+                    return new SynthaticNode(tokens.remove());
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Relational Operator", tokens -> {
+            Token token = tokens.peek();
+            if (token != null && token.getType() == TokenType.RELATIONAL) {
+                return new SynthaticNode(tokens.remove());
+            }
+            return null;
+        });
+        
+        this.functions.put("Logic Operator", tokens -> {
+            Token token = tokens.peek();
+            if (token != null && token.getType() == TokenType.LOGIC) {
+                return new SynthaticNode(tokens.remove());
+            }
+            return null;
+        });
+        
+        this.functions.put("Negate", tokens -> {
+            Token token = tokens.remove();
+            if (token != null) {
+                if ("!".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Negate", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        /*END*/
         
         this.functions.put("Program", tokens -> {
             while (tokens.size() > 0) {
@@ -91,14 +156,6 @@ public class SynthaticAnalyser extends ChainedCall {
                 node.add(this.call("Type", tokens).getTokenNode());
                 node.add(this.call("Valid Identifier").getTokenNode());
                 return node;
-            }
-            return null;
-        });
-        
-        this.functions.put("Type", tokens -> {
-            Token token = tokens.peek();
-            if (token != null && token.getType() == TokenType.RESERVED) {
-                return new SynthaticNode(tokens.remove());
             }
             return null;
         });
