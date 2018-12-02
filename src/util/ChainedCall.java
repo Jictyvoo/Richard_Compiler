@@ -62,4 +62,16 @@ public abstract class ChainedCall {
     public SynthaticNode getTokenNode() {
         return tokenNode;
     }
+
+    public void showDerivation(SynthaticNode node) {
+        if (node != null) {
+            if (node.getNodeList().isEmpty()) {
+                System.out.println(node.getToken() != null ? node.getToken() : "Empty");
+            } else {
+                for (SynthaticNode synthaticNode : node.getNodeList()) {
+                    this.showDerivation(synthaticNode);
+                }
+            }
+        }
+    }
 }
