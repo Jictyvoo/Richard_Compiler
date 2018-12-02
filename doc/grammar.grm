@@ -58,8 +58,10 @@ NumberTerminal       = {Number}+('.'{Number}+)?
 <Array>                       ::= '[' <Array Position> ']' <Array>  |
           
 <Init Array>                  ::= '{' <Init Array_2> '}'
+
+<Init Array_1>                ::= <Init Array_2> |
                 
-<Init Array_2>                ::= '(' <Init Array_3> ')' |  '(' <Init Array_3> ')' <Init Array_2>
+<Init Array_2>                ::= '(' <Init Array_3> ')' <Init Array_1>
                  
 <Init Array_3>                ::= <Initial Value> | <Initial Value> ',' <Init Array_3>
 
@@ -91,7 +93,7 @@ NumberTerminal       = {Number}+('.'{Number}+)?
 
 <Initialize>                  ::= '=' <Expression> |
 
-<Initialize Variable>         ::= <Multiple Identifier> <Initialize>
+<Initialize Variable>         ::= <Multiple Identifier> <Initialize> |
                         
 <Variable Assignment>         ::=  <Declaration> <Initialize> <Initialize Variable> ';' <Variable Assignment> |
 
@@ -122,9 +124,9 @@ NumberTerminal       = {Number}+('.'{Number}+)?
                         
 <Return Statement>            ::= <Condition> | '(' <Return Statement> ')' |
                                
-<Attributition>               ::= '=' <Expression> | <Increment-Decrement>
+<Attribution>               ::= '=' <Expression> | <Increment-Decrement>
 
-<Execute Line>                ::= <Call Arguments> | <Attributition>
+<Execute Line>                ::= <Attribution> | <Call Arguments>
 
 <Line Code>                   ::= 'return' <Return Statement> | <Read> | <Write> | <Identifier With Attributes> <Execute Line>
                         

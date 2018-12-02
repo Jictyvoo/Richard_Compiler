@@ -42,17 +42,16 @@ public class SynthaticAutomatic extends ChainedCall {
     }
 
     private boolean isLastEmpty(SynthaticNode synthaticNode) {
-        if (synthaticNode.getToken() == null) {
-            return true;
-        }
-        boolean isEmpty = false;
-        for (SynthaticNode node : synthaticNode.getNodeList()) {
-            isEmpty = isEmpty || this.isLastEmpty(node);
-        }
-        return isEmpty;
+        return synthaticNode.isEmpty();
     }
 
     private SynthaticNode automatic(String production, Queue<Token> queue) {
+        if (queue.peek() == null) {
+            if (production.equals(FirstFollow.getInstance().StartSymbol)) {
+                return new SynthaticNode();
+            }
+            return null;
+        }
         int index = 0;
         for (List<String> produces : this.productions.get(production)) {
             SynthaticNode hasConsumed = new SynthaticNode();
@@ -64,13 +63,11 @@ public class SynthaticAutomatic extends ChainedCall {
                     if (this.predict(derivation.replaceAll("[<|>]", ""), queue.peek())) {
                         SynthaticNode synthaticNode = this.automatic(derivation, queue);
                         if (synthaticNode != null) {
-                            hasConsumed.add(synthaticNode);
-                            System.out.println(production + " generate " + derivation + " count: " + count + " produces: " + this.productions.get(production).size() + " --> " + isLastEmpty(synthaticNode));
                             if (isLastEmpty(synthaticNode) && index < this.productions.get(production).size() - 1) {
-                                //System.out.println(derivation + " produces " + produces.get(count + 1));
                                 count += 1;
                                 continue;
                             }
+                            hasConsumed.add(synthaticNode);
                         } else if (!this.first.get(derivation.replaceAll("[<|>]", "")).contains("")) {
                             hasError = true;
                         }
@@ -83,11 +80,10 @@ public class SynthaticAutomatic extends ChainedCall {
                             consume = queue.peek();
                         }
                         if (queue.peek() != null) {
-                            queue.remove();
+                            System.out.println("Removed " + queue.remove() + " __" + derivation);
                         }
                     }
                     if (hasError) {
-                        System.out.println(production + " --> " + queue.peek() + " __" + derivation);
                         Token token = queue.peek();
                         Lexeme lexeme = token != null ? token.getLexeme() : null;
                         this.errors.add(new SynthaticParseErrors(this.first.get(derivation.replaceAll("[<|>]", "")), lexeme));
@@ -102,7 +98,14 @@ public class SynthaticAutomatic extends ChainedCall {
                         } else if ("".equals(derivation)) {
                             hasConsumed.add(new SynthaticNode());
                             count += 1;
-                            break;
+                            continue;
+                        } else if (count > 0) {
+                            if (count == 1 && this.first.get(production.replaceAll("[<|>]", "")).contains("")) {
+                                break;
+                            } else {
+                                /*throw error*/
+                                return null;
+                            }
                         }
                     }
                 }
@@ -121,7 +124,7 @@ public class SynthaticAutomatic extends ChainedCall {
         return null;
     }
 
-    public SynthaticNode startAutomatic(Queue<Token> queue) {
+    public SynthaticNode start(Queue<Token> queue) {
         while (!queue.isEmpty()) {
             SynthaticNode received = this.automatic(FirstFollow.getInstance().StartSymbol, queue);
             if (received != null) {

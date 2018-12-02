@@ -4,6 +4,7 @@ package view;
 
 import controllers.LexicalAnalyser;
 import controllers.SynthaticAnalyser;
+import controllers.SynthaticAutomatic;
 import models.business.FileManager;
 import models.value.LexicalParseErrors;
 import models.value.Token;
@@ -85,8 +86,9 @@ public class RichardMain {
                     e.printStackTrace();
                 }
                 if (lexicalAnalyser.getParseErrors().get(filename).isEmpty()) {
-                    SynthaticNode node = SynthaticAnalyser.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
-                    SynthaticAnalyser.getInstance().showDerivation(node);
+                    SynthaticNode node = SynthaticAutomatic.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
+                    //SynthaticNode node = SynthaticAnalyser.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
+                    //SynthaticAnalyser.getInstance().showDerivation(node);
                 }
             }
         } catch (FileNotExistsException e) {
