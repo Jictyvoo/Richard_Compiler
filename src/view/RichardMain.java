@@ -85,7 +85,7 @@ public class RichardMain {
                     e.printStackTrace();
                 }
                 if (lexicalAnalyser.getParseErrors().get(filename).isEmpty()) {
-                    SynthaticNode node = SynthaticAnalyser.getInstance().startAutomatic((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
+                    SynthaticNode node = SynthaticAnalyser.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
                     SynthaticAnalyser.getInstance().showDerivation(node);
                 }
             }

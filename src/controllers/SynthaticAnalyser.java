@@ -63,7 +63,9 @@ public class SynthaticAnalyser extends ChainedCall {
         this.functions.put("Value", tokens -> {
             Token token = tokens.peek();
             if (token != null) {
-                if (token.getType() == TokenType.STRING || token.getType() == TokenType.NUMBER || token.getType() == TokenType.RESERVED) {
+                if (token.getType() == TokenType.STRING || token.getType() == TokenType.NUMBER) {
+                    return new SynthaticNode(tokens.remove());
+                }else if(token.getLexeme().getValue().equals("true") || token.getLexeme().getValue().equals("false")){
                     return new SynthaticNode(tokens.remove());
                 }
             }
@@ -184,9 +186,18 @@ public class SynthaticAnalyser extends ChainedCall {
         this.functions.put("Expression", tokens -> {
             Token token = tokens.peek();
             if (token != null) {
-                SynthaticNode node = new SynthaticNode(tokens.remove());
-                node.add(this.call("Expr Arit", tokens).getTokenNode());
-                return node;
+                if (token.getLexeme().getValue().equals("(")) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Expr Arit", tokens).getTokenNode());
+                    if (node != null && tokens.peek().getLexeme().getValue().equals(")")) {
+                        node.add(new SynthaticNode(tokens.remove()));
+                        return node;
+                    }
+                }else{
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Expr Arit", tokens).getTokenNode());
+                    return node;
+                }
             }
             return null;
         });
@@ -219,8 +230,20 @@ public class SynthaticAnalyser extends ChainedCall {
             if (token != null) {
                 SynthaticNode node = new SynthaticNode(tokens.remove());
                 node.add(this.call("Negate Exp", tokens).getTokenNode());
-                node.add(this.call("Expression", tokens).getTokenNode());
+                node.add(this.call("Multiple", tokens).getTokenNode());
                 return node;
+            }
+            return null;
+        });
+        
+        this.functions.put("Multiple", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if ("*".equals(token.getLexeme().getValue()) || "/".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Expression", tokens).getTokenNode());
+                    return node;
+                }
             }
             return null;
         });
@@ -231,6 +254,44 @@ public class SynthaticAnalyser extends ChainedCall {
                 if("-".equals(token.getLexeme().getValue())){
                     SynthaticNode node = new SynthaticNode(tokens.remove());
                     node.add(this.call("Initial Value", tokens).getTokenNode());
+                    return node;
+                }else{
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Initial Value", tokens).getTokenNode());
+                    return node;
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Relational Logic", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Relational Operator", tokens).getTokenNode());
+                node.add(this.call("Condition", tokens).getTokenNode());
+                node.add(this.call("Logic Operator", tokens).getTokenNode());
+            }
+            return null;
+        });
+        
+        this.functions.put("Condition", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if ("(".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Condition", tokens).getTokenNode());
+                    
+                    if (node != null && tokens.peek().getLexeme().getValue().equals(")")) {
+                        node.add(new SynthaticNode(tokens.remove()));
+                        node.add(this.call("Relational Logic", tokens).getTokenNode());
+                        return node;
+                    }
+                }else{
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Negate", tokens).getTokenNode());
+                    node.add(this.call("Expression", tokens).getTokenNode());
+                    node.add(this.call("Relational Logic", tokens).getTokenNode());
                     return node;
                 }
             }
@@ -250,13 +311,46 @@ public class SynthaticAnalyser extends ChainedCall {
             return null;
         });
         
+        this.functions.put("Array", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                if ("[".equals(token.getLexeme().getValue())) {
+                    SynthaticNode node = new SynthaticNode(tokens.remove());
+                    node.add(this.call("Array Position", tokens).getTokenNode());
+                    if (node != null) {
+                        if (tokens.peek().getLexeme().getValue().equals("]")) {
+                            node.add(new SynthaticNode(tokens.remove()));
+                            node.add(this.call("Array", tokens).getTokenNode());
+                            return node;
+                        }
+                    }
+                }
+            }
+            return null;
+        });
+        
+        this.functions.put("Array Position", tokens -> {
+            Token token = tokens.peek();
+            if (token != null) {
+                SynthaticNode node = new SynthaticNode(tokens.remove());
+                node.add(this.call("Expression", tokens).getTokenNode());
+                return node;
+            }
+            return null;
+        });
+        
         this.functions.put("Init Array", tokens -> {
             Token token = tokens.remove();
             if (token != null) {
                 if("{".equals(token.getLexeme().getValue())){
                     SynthaticNode node = new SynthaticNode(tokens.remove());
                     node.add(this.call("Init Array_2", tokens).getTokenNode());
-                    return node;
+                    if (node != null) {
+                        if (tokens.peek().getLexeme().getValue().equals("}")) {
+                            node.add(new SynthaticNode(tokens.remove()));
+                            return node;
+                        }
+                    }
                 }
             }
             return null;
@@ -268,8 +362,20 @@ public class SynthaticAnalyser extends ChainedCall {
                 if ("(".equals(token.getLexeme().getValue())) {
                     SynthaticNode node = new SynthaticNode(tokens.remove());
                     node.add(this.call("Init Array_3", tokens).getTokenNode());
-                    node.add(this.call("Init Array_2", tokens).getTokenNode());
-                    return node;
+                    if (node != null) {
+                        if (tokens.peek().getLexeme().getValue().equals(")")) {
+                            node.add(new SynthaticNode(tokens.remove()));
+                            if (tokens.peek().getLexeme().getValue().equals("(")) {
+                                node.add(new SynthaticNode(tokens.remove()));
+                                node.add(this.call("Init Array_2", tokens).getTokenNode());
+                                if (tokens.peek().getLexeme().getValue().equals(")")) {
+                                    node.add(new SynthaticNode(tokens.remove()));
+                                    return node;
+                                }
+                            }
+                            return node;
+                        }
+                    }
                 }
             }
             return null;
