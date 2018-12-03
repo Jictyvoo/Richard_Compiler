@@ -57,7 +57,7 @@ public class SynthaticAutomatic extends ChainedCall {
             SynthaticNode hasConsumed = new SynthaticNode();
             int count = 0;
             for (String derivation : produces) {
-                System.out.println("Entering Production: " + queue.peek() + " __" + production + " deriv." + derivation);
+                /*System.out.println("Entering Production: " + queue.peek() + " __" + production + " deriv." + derivation);*/
                 if (this.isProduction(derivation)) {    /*has a problem when receiving a node with empty content*/
                     boolean hasError = false;
                     if (this.predict(derivation.replaceAll("[<|>]", ""), queue.peek())) {
@@ -75,14 +75,13 @@ public class SynthaticAutomatic extends ChainedCall {
                         hasError = true;
                         Token consume = queue.peek();
                         while (consume != null && !this.isSynchronizationToken(consume, derivation)) {
-                            System.out.println("Consumed " + derivation + "__> " + queue.remove() + " __" + production);
-                            //queue.remove();
+                            queue.remove();
                             consume = queue.peek();
-                            this.errors.add(new SynthaticParseErrors(this.first.get(queue.remove().getLexeme().getValue()), queue.peek().getLexeme()));
+                            this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
                         }
                         if (queue.peek() != null) {
-                            System.out.println("Removed " + queue.remove() + " __" + derivation);
-                            this.errors.add(new SynthaticParseErrors(this.first.get(queue.remove().getLexeme().getValue()), queue.peek().getLexeme()));
+                            consume = queue.remove();
+                            this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
                         }
                     }
                     if (hasError) {
@@ -105,8 +104,7 @@ public class SynthaticAutomatic extends ChainedCall {
                             if (count == 1 && this.first.get(production.replaceAll("[<|>]", "")).contains("")) {
                                 break;
                             } else {
-                                /*throw error*/
-                                this.errors.add(new SynthaticParseErrors(this.first.get(queue.peek().getLexeme().getValue()), queue.peek().getLexeme()));
+                                this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), token.getLexeme()));
                                 return null;
                             }
                         }
@@ -136,5 +134,13 @@ public class SynthaticAutomatic extends ChainedCall {
             queue.remove();
         }
         return null;
+    }
+
+    public List<SynthaticParseErrors> getErrors() {
+        return errors;
+    }
+
+    public void clearErrors() {
+        this.errors = new ArrayList<>();
     }
 }

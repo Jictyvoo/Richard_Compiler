@@ -13,7 +13,14 @@ public class SynthaticParseErrors {
 
     @Override
     public String toString() {
-        return "Synthatic Error:" + this.lexeme.getFile() + " " + this.lexeme.getLineNumber() + ":"
-                + this.lexeme.getColumn() + " >> Expected one of the following tokens " + this.error + ": get " + this.lexeme.getValue();
+        if (this.lexeme != null) {
+            return "Synthatic Error:" + this.lexeme.getFile() + " " + this.lexeme.getLineNumber() + ":"
+                    + this.lexeme.getColumn() + " >> Expected one of the following tokens " + this.error + ": get " + this.lexeme.getValue();
+        }
+        return "Synthatic Error:" + " >> Expected one of the following tokens " + this.error;
+    }
+
+    public Lexeme getLexeme() {
+        return this.lexeme;
     }
 }

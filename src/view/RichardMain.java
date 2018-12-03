@@ -7,6 +7,7 @@ import controllers.SynthaticAnalyser;
 import controllers.SynthaticAutomatic;
 import models.business.FileManager;
 import models.value.LexicalParseErrors;
+import models.value.SynthaticParseErrors;
 import models.value.Token;
 import util.SynthaticNode;
 import util.exception.FileNotExistsException;
@@ -55,7 +56,7 @@ public class RichardMain {
     }
 
     public static void main(String... args) {
-        String rootPath = args.length > 0 ? args[0] : "inputDemo/";
+        String rootPath = args.length > 0 ? args[0] : "src/";
         try {
             readDirectory(rootPath); /*Performs directory reading*/
             makeDirectories(rootPath); /*Create output directories*/
@@ -75,6 +76,13 @@ public class RichardMain {
                     /*Syntax analyzer output*/
                     if (lexicalAnalyser.getParseErrors().get(filename).isEmpty()) {
                         writer.println("\n\nSuccess, all lexical analyse defined your code fine!");
+                        SynthaticNode node = SynthaticAutomatic.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
+                        writer.println("\n");
+                        for (SynthaticParseErrors synthaticParseErrors : SynthaticAutomatic.getInstance().getErrors()) {
+                            if (synthaticParseErrors.getLexeme() != null)
+                                writer.println(synthaticParseErrors.toString());
+                        }
+                        SynthaticAutomatic.getInstance().clearErrors();
                     } else {
                         writer.println("\n\nErrors Bellow\n\n");
                         for (LexicalParseErrors lexicalParseErrors : lexicalAnalyser.getParseErrors().get(filename)) {
