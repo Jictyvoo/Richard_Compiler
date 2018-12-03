@@ -81,6 +81,8 @@ public class RichardMain {
                         for (SynthaticParseErrors synthaticParseErrors : SynthaticAutomatic.getInstance().getErrors()) {
                             if (synthaticParseErrors.getLexeme() != null)
                                 writer.println(synthaticParseErrors.toString());
+                            //SynthaticNode node = SynthaticAnalyser.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
+                            //SynthaticAnalyser.getInstance().showDerivation(node);
                         }
                         SynthaticAutomatic.getInstance().clearErrors();
                     } else {
@@ -92,11 +94,6 @@ public class RichardMain {
                     writer.close();
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-                if (lexicalAnalyser.getParseErrors().get(filename).isEmpty()) {
-                    SynthaticNode node = SynthaticAutomatic.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
-                    //SynthaticNode node = SynthaticAnalyser.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
-                    //SynthaticAnalyser.getInstance().showDerivation(node);
                 }
             }
         } catch (FileNotExistsException e) {
