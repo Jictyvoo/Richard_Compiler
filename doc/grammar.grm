@@ -1,4 +1,4 @@
-"Name"           = 'RICHARD'
+﻿"Name"           = 'RICHARD'
 "Author"         = 'João Victor, Eduardo Marques, Gustavo Henrique, Marcos Aldrey, Marcos Vinicius, Alyson, Alisson, André, Gilvaney, Nielson, Lucas Cardoso'
 "Version"        = 'The version of the grammar and/or language'
 "About"          = 'A short description of the grammar'
@@ -63,7 +63,9 @@ NumberTerminal       = {Number}+('.'{Number}+)?
                 
 <Init Array_2>                ::= '(' <Init Array_3> ')' <Init Array_1>
                  
-<Init Array_3>                ::= <Initial Value> | <Initial Value> ',' <Init Array_3>
+<Init Array_3>                ::= <Initial Value> <Init Array_4>
+                               
+<Init Array_4>                ::= ',' <Init Array_3> <Init Array_4> |
 
 <Declaration>                 ::= <Type> <Valid Identifier>
 
@@ -147,3 +149,4 @@ NumberTerminal       = {Number}+('.'{Number}+)?
 <To-Write>                    ::= ',' <Valid Values> <To-Write> | ',' <Method Call> <To-Write> |
 
 <Write Parameters>            ::= <Valid Values> <To-Write> | <Method Call> <To-Write>
+
