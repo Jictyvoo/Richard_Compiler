@@ -78,9 +78,11 @@ public class SynthaticAutomatic extends ChainedCall {
                             System.out.println("Consumed " + derivation + "__> " + queue.remove() + " __" + production);
                             //queue.remove();
                             consume = queue.peek();
+                            this.errors.add(new SynthaticParseErrors(this.first.get(queue.remove().getLexeme().getValue()), queue.peek().getLexeme()));
                         }
                         if (queue.peek() != null) {
                             System.out.println("Removed " + queue.remove() + " __" + derivation);
+                            this.errors.add(new SynthaticParseErrors(this.first.get(queue.remove().getLexeme().getValue()), queue.peek().getLexeme()));
                         }
                     }
                     if (hasError) {
@@ -104,6 +106,7 @@ public class SynthaticAutomatic extends ChainedCall {
                                 break;
                             } else {
                                 /*throw error*/
+                                this.errors.add(new SynthaticParseErrors(this.first.get(queue.peek().getLexeme().getValue()), queue.peek().getLexeme()));
                                 return null;
                             }
                         }
