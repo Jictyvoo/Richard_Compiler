@@ -22,6 +22,8 @@ public class SemanticAnalyser {
         if (queue != null && !queue.isEmpty()) {
             if ("const".equals(queue.peek().getLexeme().getValue())) {
                 tableConst(queue);
+            }else if("class".equals(queue.peek().getLexeme().getValue())){
+                tableClass(queue);
             }
         }
         test(); //test table
@@ -55,6 +57,19 @@ public class SemanticAnalyser {
                 }
             }
             table.put("const", constant);
+        }
+    }
+    
+    public void tableClass(Queue<Token> queue){
+        if ("class".equals(queue.peek().getLexeme().getValue())) {
+            queue.remove();
+            HashMap<String, TableOfSymbols> tClass = new HashMap<>();
+            boolean control = true;
+            
+            String nameClass = queue.remove().getLexeme().getValue();
+            
+            while (control) {
+            }
         }
     }
     
