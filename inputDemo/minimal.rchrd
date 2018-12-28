@@ -1,5 +1,7 @@
 const {
     int CONSTANT = 1 - 2;
+    float cuscuz = 10;
+    string fuba = "Essencia do cuscuz <3";
 }
 
 class Pokemon extends Pikachu{

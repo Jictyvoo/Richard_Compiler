@@ -3,12 +3,21 @@ package util;
 import models.value.Token;
 
 public class TableOfSymbols {
+    private String category;
     private Token type;
     private Token token;
 
     public TableOfSymbols(Token token, Token type) {
         this.token = token;
         this.type = type;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public Token getType() {
@@ -32,6 +41,6 @@ public class TableOfSymbols {
 
     @Override
     public String toString() {
-        return type.getLexeme().getValue() + " " + token.getLexeme().getValue();
+        return "Category: " + category + " -> " + type.getLexeme().getValue() + " " + token.getLexeme().getValue();
     }
 }
