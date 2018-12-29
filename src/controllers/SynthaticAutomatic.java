@@ -1,7 +1,7 @@
 package controllers;
 
 import models.value.Lexeme;
-import models.value.SynthaticParseErrors;
+import models.value.SemanticParseErrors;
 import models.value.Token;
 import util.ChainedCall;
 import util.FirstFollow;
@@ -17,7 +17,7 @@ public class SynthaticAutomatic extends ChainedCall {
 
     private static SynthaticAutomatic instance;
     private HashMap<String, List<List<String>>> productions;
-    private List<SynthaticParseErrors> errors;
+    private List<SemanticParseErrors> errors;
 
     private SynthaticAutomatic() {
         super();
@@ -54,7 +54,7 @@ public class SynthaticAutomatic extends ChainedCall {
         }
         int index = 0;
         for (List<String> produces : this.productions.get(production)) {
-            SynthaticNode hasConsumed = new SynthaticNode();
+            SynthaticNode hasConsumed = new SynthaticNode(production);
             int count = 0;
             for (String derivation : produces) {
                 /*System.out.println("Entering Production: " + queue.peek() + " __" + production + " deriv." + derivation);*/
@@ -77,25 +77,25 @@ public class SynthaticAutomatic extends ChainedCall {
                         while (consume != null && !this.isSynchronizationToken(consume, derivation)) {
                             queue.remove();
                             consume = queue.peek();
-                            this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
+                            this.errors.add(new SemanticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
                         }
                         if (queue.peek() != null) {
                             consume = queue.remove();
-                            this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
+                            this.errors.add(new SemanticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
                         }
                     }
                     if (hasError) {
                         Token token = queue.peek();
                         Lexeme lexeme = token != null ? token.getLexeme() : null;
-                        this.errors.add(new SynthaticParseErrors(this.first.get(derivation.replaceAll("[<|>]", "")), lexeme));
+                        this.errors.add(new SemanticParseErrors(this.first.get(derivation.replaceAll("[<|>]", "")), lexeme));
                     }
                 } else {
                     Token token = queue.peek();
                     if (token != null) {
                         if (token.getLexeme().getValue().equals(derivation.replace("\'", ""))) {
-                            hasConsumed.add(new SynthaticNode(queue.remove()));
+                            hasConsumed.add(new SynthaticNode(queue.remove(), derivation));
                         } else if (this.predict(derivation.replace("\'", ""), token)) {
-                            hasConsumed.add(new SynthaticNode(queue.remove()));
+                            hasConsumed.add(new SynthaticNode(queue.remove(), derivation));
                         } else if ("".equals(derivation)) {
                             hasConsumed.add(new SynthaticNode());
                             count += 1;
@@ -104,7 +104,7 @@ public class SynthaticAutomatic extends ChainedCall {
                             if (count == 1 && this.first.get(production.replaceAll("[<|>]", "")).contains("")) {
                                 break;
                             } else {
-                                this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), token.getLexeme()));
+                                this.errors.add(new SemanticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), token.getLexeme()));
                                 return null;
                             }
                         }
@@ -118,6 +118,7 @@ public class SynthaticAutomatic extends ChainedCall {
             if (!hasConsumed.isEmpty() && count != produces.size()) {
                 return null;
             } else if (!hasConsumed.isEmpty()) {
+                SemanticAnalyser.getInstance().analyse(hasConsumed);
                 return hasConsumed;
             }
             index += 1;
@@ -136,7 +137,7 @@ public class SynthaticAutomatic extends ChainedCall {
         return null;
     }
 
-    public List<SynthaticParseErrors> getErrors() {
+    public List<SemanticParseErrors> getErrors() {
         return errors;
     }
 

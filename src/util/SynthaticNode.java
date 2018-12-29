@@ -9,11 +9,13 @@ public class SynthaticNode {
     private List<SynthaticNode> nodeList;
     private Token token;
     private boolean empty;
+    private String production;
 
-    public SynthaticNode(Token token) {
+    public SynthaticNode(Token token, String production) {
         this.nodeList = new ArrayList<>();
         this.token = token;
         empty = false;
+        this.production = production;
     }
 
     public SynthaticNode() {
@@ -22,9 +24,16 @@ public class SynthaticNode {
         empty = true;
     }
 
+    public SynthaticNode(String production) {
+        this.nodeList = new ArrayList<>();
+        this.token = null;
+        empty = true;
+        this.production = production;
+    }
+
     public void add(SynthaticNode synthaticNode) {
         if (synthaticNode != null) {
-            if(this.empty){
+            if (this.empty) {
                 this.empty = false;
             }
             this.nodeList.add(synthaticNode);
@@ -41,5 +50,9 @@ public class SynthaticNode {
 
     public boolean isEmpty() {
         return this.empty;
+    }
+
+    public String getProduction() {
+        return production;
     }
 }

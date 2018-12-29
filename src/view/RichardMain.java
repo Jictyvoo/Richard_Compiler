@@ -3,12 +3,10 @@ package view;
 //Authors: João Victor & Eduardo Marques
 
 import controllers.LexicalAnalyser;
-import controllers.SemanticAnalyser;
-import controllers.SynthaticAnalyser;
 import controllers.SynthaticAutomatic;
 import models.business.FileManager;
 import models.value.LexicalParseErrors;
-import models.value.SynthaticParseErrors;
+import models.value.SemanticParseErrors;
 import models.value.Token;
 import util.SynthaticNode;
 import util.exception.FileNotExistsException;
@@ -77,16 +75,12 @@ public class RichardMain {
                     /*Syntax analyzer output*/
                     if (lexicalAnalyser.getParseErrors().get(filename).isEmpty()) {
                         writer.println("\n\nSuccess, all lexical analyse defined your code fine!");
-                        
-                        SemanticAnalyser.getInstance().CreateTableSymb((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
-                        
+
                         SynthaticNode node = SynthaticAutomatic.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
                         writer.println("\n");
-                        for (SynthaticParseErrors synthaticParseErrors : SynthaticAutomatic.getInstance().getErrors()) {
+                        for (SemanticParseErrors synthaticParseErrors : SynthaticAutomatic.getInstance().getErrors()) {
                             if (synthaticParseErrors.getLexeme() != null)
                                 writer.println(synthaticParseErrors.toString());
-                            //SynthaticNode node = SynthaticAnalyser.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
-                            //SynthaticAnalyser.getInstance().showDerivation(node);
                         }
                         SynthaticAutomatic.getInstance().clearErrors();
                     } else {
