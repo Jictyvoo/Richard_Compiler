@@ -9,6 +9,8 @@ import util.SynthaticNode;
 
 public class SemanticAnalyser {
     private static SemanticAnalyser instance;
+    private HashSet<SynthaticNode> postAnalysis;
+    private HashSet<SynthaticNode> alreadyAnalyzed;
     private List<SemanticParseErrors> errors;
     private HashMap<String, String> inheritance;
     private HashSet<String> validTypes;
@@ -26,6 +28,22 @@ public class SemanticAnalyser {
         this.validTypes = new HashSet<>(Arrays.asList("string", "float", "int", "bool"));
         this.classNames = new HashSet<>();
         this.errors = new ArrayList<>();
+        this.postAnalysis = new HashSet<>();
+        this.alreadyAnalyzed = new HashSet<>();
+    }
+
+    private void toAnalyse(SynthaticNode synthaticNode, HashSet<String> error, Lexeme lexeme) {
+        if (this.postAnalysis.contains(synthaticNode)) {
+            if (!this.alreadyAnalyzed.contains(synthaticNode)) {
+                this.errors.add(new SemanticParseErrors(error, lexeme));
+                System.out.println(new SemanticParseErrors(error, lexeme));
+            } else {
+                this.alreadyAnalyzed.add(synthaticNode);
+            }
+            this.postAnalysis.remove(synthaticNode);
+        } else {
+            this.postAnalysis.add(synthaticNode);
+        }
     }
 
     void analyse(SynthaticNode hasConsumed) {
@@ -44,7 +62,7 @@ public class SemanticAnalyser {
                         if (this.classNames.contains(className)) {
                             this.inheritance.put(newType, className);
                         } else {
-                            this.errors.add(new SemanticParseErrors(this.classNames, null));
+                            this.toAnalyse(hasConsumed, this.classNames, lexeme);
                         }
                     }
                 }
@@ -55,9 +73,15 @@ public class SemanticAnalyser {
                 Lexeme lexeme = hasConsumed.getNodeList().get(0).getNodeList().get(0).getNodeList().get(0).getToken().getLexeme();
                 String type = lexeme.getValue();
                 if (!this.validTypes.contains(type)) {
-                    this.errors.add(new SemanticParseErrors(this.validTypes, lexeme));
+                    this.toAnalyse(hasConsumed, this.validTypes, lexeme);
                 }
             }
+        }
+    }
+
+    void executePostAnalysis() {
+        for (SynthaticNode synthaticNode : this.postAnalysis) {
+            this.analyse(synthaticNode);
         }
     }
 }

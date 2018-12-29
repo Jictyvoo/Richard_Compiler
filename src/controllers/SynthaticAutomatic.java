@@ -130,10 +130,12 @@ public class SynthaticAutomatic extends ChainedCall {
         while (!queue.isEmpty()) {
             SynthaticNode received = this.automatic(FirstFollow.getInstance().StartSymbol, queue);
             if (received != null) {
+                SemanticAnalyser.getInstance().executePostAnalysis();
                 return received;
             }
             queue.remove();
         }
+        SemanticAnalyser.getInstance().executePostAnalysis();
         return null;
     }
 
