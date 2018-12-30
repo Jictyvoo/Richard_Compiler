@@ -11,6 +11,7 @@ public class SemanticAnalyser {
     private static SemanticAnalyser instance;
     private HashSet<SynthaticNode> postAnalysis;
     private HashSet<SynthaticNode> alreadyAnalyzed;
+    private HashSet<SynthaticNode> successAnalyzed;
     private List<SemanticParseErrors> errors;
     private HashMap<String, String> inheritance;
     private HashSet<String> validTypes;
@@ -32,6 +33,7 @@ public class SemanticAnalyser {
         this.errors = new ArrayList<>();
         this.postAnalysis = new HashSet<>();
         this.alreadyAnalyzed = new HashSet<>();
+        this.successAnalyzed = new HashSet<>();
         this.globalConstants = new HashMap<>();
         this.scopeElements = new HashMap<>();
     }
@@ -54,28 +56,31 @@ public class SemanticAnalyser {
         return synthaticNode.getProduction();
     }
 
-    void analyse(SynthaticNode hasConsumed) {
-        if ("<Program>".equals(hasConsumed.getProduction())) {
-            String subProduction = hasConsumed.getNodeList().get(0).getProduction();
-            if ("<Class>".equals(subProduction)) {
-                String newType = hasConsumed.getNodeList().get(0).getNodeList().get(1).getToken().getLexeme().getValue();
-                this.validTypes.add(newType);
-                this.classNames.add(newType);
-                subProduction = hasConsumed.getNodeList().get(0).getNodeList().get(2).getProduction();
-                if ("<Extends>".equals(subProduction)) {
-                    Token token = hasConsumed.getNodeList().get(0).getNodeList().get(2).getNodeList().get(0).getToken();
-                    if (token != null) {
-                        Lexeme lexeme = hasConsumed.getNodeList().get(0).getNodeList().get(2).getNodeList().get(1).getToken().getLexeme();
-                        String className = lexeme.getValue();
-                        if (this.classNames.contains(className)) {
-                            this.inheritance.put(newType, className);
-                        } else {
-                            this.toAnalyse(hasConsumed, this.classNames, lexeme);
-                        }
+    private void analyseClass(SynthaticNode hasConsumed) {
+        if(!this.successAnalyzed.contains(hasConsumed)) {
+            String newType = hasConsumed.getNodeList().get(0).getNodeList().get(1).getToken().getLexeme().getValue();
+            this.validTypes.add(newType);
+            this.classNames.add(newType);
+            this.successAnalyzed.add(hasConsumed);
+            String subProduction = hasConsumed.getNodeList().get(0).getNodeList().get(2).getProduction();
+            if ("<Extends>".equals(subProduction)) {
+                Token token = hasConsumed.getNodeList().get(0).getNodeList().get(2).getNodeList().get(0).getToken();
+                if (token != null) {
+                    Lexeme lexeme = hasConsumed.getNodeList().get(0).getNodeList().get(2).getNodeList().get(1).getToken().getLexeme();
+                    String className = lexeme.getValue();
+                    if (this.classNames.contains(className)) {
+                        this.successAnalyzed.add(hasConsumed.getNodeList().get(0).getNodeList().get(2));
+                        this.inheritance.put(newType, className);
+                    } else {
+                        this.toAnalyse(hasConsumed, this.classNames, lexeme);
                     }
                 }
             }
-        } else if ("<Constant Assignment>".equals(hasConsumed.getProduction())) {
+        }
+    }
+
+    private void analyseConstantAssignment(SynthaticNode hasConsumed) {
+        if (!this.successAnalyzed.contains(hasConsumed)) {
             String subProduction = hasConsumed.getNodeList().get(0).getProduction();
             if (subProduction != null) {
                 Lexeme lexeme = hasConsumed.getNodeList().get(0).getNodeList().get(0).getNodeList().get(0).getToken().getLexeme();
@@ -84,12 +89,34 @@ public class SemanticAnalyser {
                     this.toAnalyse(hasConsumed, this.validTypes, lexeme);
                 } else {
                     this.globalConstants.put(hasConsumed.getNodeList().get(0).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme().getValue(), type);
-                    if(!type.equals(this.getExpressionValue(hasConsumed.getNodeList().get(2)))){
+                    this.successAnalyzed.add(hasConsumed);
+                    if (!type.equals(this.getExpressionValue(hasConsumed.getNodeList().get(2)))) {
                         this.errors.add(new SemanticParseErrors(this.validTypes, lexeme));
                         System.out.println(new SemanticParseErrors(this.validTypes, lexeme));
                     }
+                    if (hasConsumed.getNodeList().size() > 4) {
+                        this.analyseConstantAssignment(hasConsumed.getNodeList().get(4));
+                    }
                 }
             }
+        }
+    }
+
+    private void analyseProgram(SynthaticNode synthaticNode) {
+        for (SynthaticNode hasConsumed : synthaticNode.getNodeList()) {
+            if ("<Class>".equals(hasConsumed.getProduction())) {
+                this.analyseClass(synthaticNode);
+            } else if ("<Constants>".equals(hasConsumed.getProduction())) {
+                this.analyseConstantAssignment(hasConsumed.getNodeList().get(2));
+            }
+        }
+    }
+
+    void analyse(SynthaticNode hasConsumed) {
+        if ("<Program>".equals(hasConsumed.getProduction())) {
+            this.analyseProgram(hasConsumed);
+        } else if ("<Constant Assignment>".equals(hasConsumed.getProduction())) {
+            this.analyseConstantAssignment(hasConsumed);
         } else if ("<Variable Assignment>".equals(hasConsumed.getProduction())) {
             String subProduction = hasConsumed.getNodeList().get(0).getProduction();
             if (subProduction != null) {
