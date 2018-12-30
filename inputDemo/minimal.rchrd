@@ -31,3 +31,9 @@ class Pokemon extends Pikachu{
         }
     }
 }
+
+class Pikachu {
+    method void a(){
+        return;
+    }
+}

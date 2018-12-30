@@ -1,11 +1,11 @@
 package controllers;
 
-import java.util.*;
-
 import models.value.Lexeme;
 import models.value.SemanticParseErrors;
 import models.value.Token;
 import util.SynthaticNode;
+
+import java.util.*;
 
 public class SemanticAnalyser {
     private static SemanticAnalyser instance;
@@ -15,6 +15,8 @@ public class SemanticAnalyser {
     private HashMap<String, String> inheritance;
     private HashSet<String> validTypes;
     private HashSet<String> classNames;
+    private HashMap<String, String> globalConstants;
+    private HashMap<SynthaticNode, HashMap<String, String>> scopeElements;
 
     static SemanticAnalyser getInstance() {
         if (instance == null) {
@@ -30,6 +32,8 @@ public class SemanticAnalyser {
         this.errors = new ArrayList<>();
         this.postAnalysis = new HashSet<>();
         this.alreadyAnalyzed = new HashSet<>();
+        this.globalConstants = new HashMap<>();
+        this.scopeElements = new HashMap<>();
     }
 
     private void toAnalyse(SynthaticNode synthaticNode, HashSet<String> error, Lexeme lexeme) {
@@ -44,6 +48,10 @@ public class SemanticAnalyser {
         } else {
             this.postAnalysis.add(synthaticNode);
         }
+    }
+
+    private String getExpressionValue(SynthaticNode synthaticNode) {
+        return synthaticNode.getProduction();
     }
 
     void analyse(SynthaticNode hasConsumed) {
@@ -74,6 +82,26 @@ public class SemanticAnalyser {
                 String type = lexeme.getValue();
                 if (!this.validTypes.contains(type)) {
                     this.toAnalyse(hasConsumed, this.validTypes, lexeme);
+                } else {
+                    this.globalConstants.put(hasConsumed.getNodeList().get(0).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme().getValue(), type);
+                    if(!type.equals(this.getExpressionValue(hasConsumed.getNodeList().get(2)))){
+                        this.errors.add(new SemanticParseErrors(this.validTypes, lexeme));
+                        System.out.println(new SemanticParseErrors(this.validTypes, lexeme));
+                    }
+                }
+            }
+        } else if ("<Variable Assignment>".equals(hasConsumed.getProduction())) {
+            String subProduction = hasConsumed.getNodeList().get(0).getProduction();
+            if (subProduction != null) {
+                Lexeme lexeme = hasConsumed.getNodeList().get(0).getNodeList().get(0).getNodeList().get(0).getToken().getLexeme();
+                String type = lexeme.getValue();
+                if (!this.validTypes.contains(type)) {
+                    this.toAnalyse(hasConsumed, this.validTypes, lexeme);
+                } else {
+                    if (!this.scopeElements.containsKey(hasConsumed.getNodeList().get(0))) {
+                        this.scopeElements.put(hasConsumed.getNodeList().get(0), new HashMap<>());
+                    }
+                    //System.out.println(this.scopeElements.get(hasConsumed.getNodeList().get(0)));
                 }
             }
         }
