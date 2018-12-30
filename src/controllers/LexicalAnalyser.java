@@ -2,7 +2,7 @@ package controllers;
 
 import models.business.FileManager;
 import models.value.Lexeme;
-import models.value.LexicalParseErrors;
+import models.value.errors.LexicalParseErrors;
 import models.value.Token;
 import util.TokenType;
 import util.TokensInformation;

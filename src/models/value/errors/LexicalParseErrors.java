@@ -1,4 +1,6 @@
-package models.value;
+package models.value.errors;
+
+import models.value.Lexeme;
 
 public class LexicalParseErrors {
     private String type;

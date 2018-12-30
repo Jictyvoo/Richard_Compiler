@@ -1,8 +1,8 @@
 package controllers;
 
 import models.value.Lexeme;
-import models.value.SemanticParseErrors;
 import models.value.Token;
+import models.value.errors.SynthaticParseErrors;
 import util.ChainedCall;
 import util.FirstFollow;
 import util.SynthaticNode;
@@ -17,7 +17,7 @@ public class SynthaticAutomatic extends ChainedCall {
 
     private static SynthaticAutomatic instance;
     private HashMap<String, List<List<String>>> productions;
-    private List<SemanticParseErrors> errors;
+    private List<SynthaticParseErrors> errors;
 
     private SynthaticAutomatic() {
         super();
@@ -77,17 +77,17 @@ public class SynthaticAutomatic extends ChainedCall {
                         while (consume != null && !this.isSynchronizationToken(consume, derivation)) {
                             queue.remove();
                             consume = queue.peek();
-                            this.errors.add(new SemanticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
+                            this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
                         }
                         if (queue.peek() != null) {
                             consume = queue.remove();
-                            this.errors.add(new SemanticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
+                            this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), consume != null ? consume.getLexeme() : null));
                         }
                     }
                     if (hasError) {
                         Token token = queue.peek();
                         Lexeme lexeme = token != null ? token.getLexeme() : null;
-                        this.errors.add(new SemanticParseErrors(this.first.get(derivation.replaceAll("[<|>]", "")), lexeme));
+                        this.errors.add(new SynthaticParseErrors(this.first.get(derivation.replaceAll("[<|>]", "")), lexeme));
                     }
                 } else {
                     Token token = queue.peek();
@@ -104,7 +104,7 @@ public class SynthaticAutomatic extends ChainedCall {
                             if (count == 1 && this.first.get(production.replaceAll("[<|>]", "")).contains("")) {
                                 break;
                             } else {
-                                this.errors.add(new SemanticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), token.getLexeme()));
+                                this.errors.add(new SynthaticParseErrors(this.first.get(production.replaceAll("[<|>]", "")), token.getLexeme()));
                                 return null;
                             }
                         }
@@ -139,7 +139,7 @@ public class SynthaticAutomatic extends ChainedCall {
         return null;
     }
 
-    public List<SemanticParseErrors> getErrors() {
+    public List<SynthaticParseErrors> getErrors() {
         return errors;
     }
 

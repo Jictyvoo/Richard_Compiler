@@ -55,4 +55,9 @@ public class SynthaticNode {
     public String getProduction() {
         return production;
     }
+
+    @Override
+    public String toString() {
+        return "SynthaticNode{" + nodeList + ", " + production + '}';
+    }
 }

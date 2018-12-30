@@ -5,9 +5,9 @@ package view;
 import controllers.LexicalAnalyser;
 import controllers.SynthaticAutomatic;
 import models.business.FileManager;
-import models.value.LexicalParseErrors;
-import models.value.SemanticParseErrors;
 import models.value.Token;
+import models.value.errors.LexicalParseErrors;
+import models.value.errors.SynthaticParseErrors;
 import util.SynthaticNode;
 import util.exception.FileNotExistsException;
 
@@ -78,7 +78,7 @@ public class RichardMain {
 
                         SynthaticNode node = SynthaticAutomatic.getInstance().start((LinkedList<Token>) lexicalAnalyser.getTokenList().get(filename));
                         writer.println("\n");
-                        for (SemanticParseErrors synthaticParseErrors : SynthaticAutomatic.getInstance().getErrors()) {
+                        for (SynthaticParseErrors synthaticParseErrors : SynthaticAutomatic.getInstance().getErrors()) {
                             if (synthaticParseErrors.getLexeme() != null)
                                 writer.println(synthaticParseErrors.toString());
                         }

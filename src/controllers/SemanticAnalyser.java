@@ -1,8 +1,10 @@
 package controllers;
 
 import models.value.Lexeme;
-import models.value.SemanticParseErrors;
 import models.value.Token;
+import models.value.errors.ClassMethodError;
+import models.value.errors.IncorrectTypeError;
+import models.value.errors.SemanticParseErrors;
 import util.SynthaticNode;
 
 import java.util.*;
@@ -14,6 +16,7 @@ public class SemanticAnalyser {
     private HashSet<SynthaticNode> successAnalyzed;
     private List<SemanticParseErrors> errors;
     private HashMap<String, String> inheritance;
+    private HashMap<String, HashSet<String>> classMethods;
     private HashSet<String> validTypes;
     private HashSet<String> classNames;
     private HashMap<String, String> globalConstants;
@@ -28,6 +31,7 @@ public class SemanticAnalyser {
 
     private SemanticAnalyser() {
         this.inheritance = new HashMap<>();
+        this.classMethods = new HashMap<>();
         this.validTypes = new HashSet<>(Arrays.asList("string", "float", "int", "bool"));
         this.classNames = new HashSet<>();
         this.errors = new ArrayList<>();
@@ -41,8 +45,8 @@ public class SemanticAnalyser {
     private void toAnalyse(SynthaticNode synthaticNode, HashSet<String> error, Lexeme lexeme) {
         if (this.postAnalysis.contains(synthaticNode)) {
             if (!this.alreadyAnalyzed.contains(synthaticNode)) {
-                this.errors.add(new SemanticParseErrors(error, lexeme));
-                System.out.println(new SemanticParseErrors(error, lexeme));
+                this.errors.add(new IncorrectTypeError(error, lexeme));
+                System.out.println(new IncorrectTypeError(error, lexeme));
             } else {
                 this.alreadyAnalyzed.add(synthaticNode);
             }
@@ -56,11 +60,26 @@ public class SemanticAnalyser {
         return synthaticNode.getProduction();
     }
 
+    private void analyseMethod(SynthaticNode synthaticNode, String className) {
+        Lexeme lexeme = synthaticNode.getNodeList().get(1).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme();
+        String methodName = lexeme.getValue();
+        if (this.classMethods.get(className).contains(methodName)) {
+            this.errors.add(new ClassMethodError("Override", lexeme));
+        }
+    }
+
+    private void analyseClassCode(SynthaticNode synthaticNode, String className) {
+        if ("<Methods>".equals(synthaticNode.getNodeList().get(0).getProduction())) {
+            this.analyseMethod(synthaticNode.getNodeList().get(0), className);
+        }
+    }
+
     private void analyseClass(SynthaticNode hasConsumed) {
-        if(!this.successAnalyzed.contains(hasConsumed)) {
+        if (!this.successAnalyzed.contains(hasConsumed)) {
             String newType = hasConsumed.getNodeList().get(0).getNodeList().get(1).getToken().getLexeme().getValue();
             this.validTypes.add(newType);
             this.classNames.add(newType);
+            this.classMethods.put(newType, new HashSet<>());
             this.successAnalyzed.add(hasConsumed);
             String subProduction = hasConsumed.getNodeList().get(0).getNodeList().get(2).getProduction();
             if ("<Extends>".equals(subProduction)) {
@@ -76,6 +95,7 @@ public class SemanticAnalyser {
                     }
                 }
             }
+            this.analyseClassCode(hasConsumed.getNodeList().get(0).getNodeList().get(4), newType);
         }
     }
 
@@ -91,8 +111,8 @@ public class SemanticAnalyser {
                     this.globalConstants.put(hasConsumed.getNodeList().get(0).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme().getValue(), type);
                     this.successAnalyzed.add(hasConsumed);
                     if (!type.equals(this.getExpressionValue(hasConsumed.getNodeList().get(2)))) {
-                        this.errors.add(new SemanticParseErrors(this.validTypes, lexeme));
-                        System.out.println(new SemanticParseErrors(this.validTypes, lexeme));
+                        this.errors.add(new IncorrectTypeError(this.validTypes, lexeme));
+                        System.out.println(new IncorrectTypeError(this.validTypes, lexeme));
                     }
                     if (hasConsumed.getNodeList().size() > 4) {
                         this.analyseConstantAssignment(hasConsumed.getNodeList().get(4));
@@ -113,6 +133,7 @@ public class SemanticAnalyser {
     }
 
     void analyse(SynthaticNode hasConsumed) {
+
         if ("<Program>".equals(hasConsumed.getProduction())) {
             this.analyseProgram(hasConsumed);
         } else if ("<Constant Assignment>".equals(hasConsumed.getProduction())) {

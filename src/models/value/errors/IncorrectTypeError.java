@@ -1,12 +1,14 @@
-package models.value;
+package models.value.errors;
+
+import models.value.Lexeme;
 
 import java.util.HashSet;
 
-public class SemanticParseErrors {
+public class IncorrectTypeError extends SemanticParseErrors {
     private HashSet<String> error;
     private Lexeme lexeme;
 
-    public SemanticParseErrors(HashSet<String> error, Lexeme lexeme) {
+    public IncorrectTypeError(HashSet<String> error, Lexeme lexeme) {
         this.error = error;
         this.lexeme = lexeme;
     }
