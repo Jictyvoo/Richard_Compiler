@@ -6,9 +6,9 @@ import models.value.errors.ClassMethodError;
 import models.value.errors.IncorrectTypeError;
 import models.value.errors.SemanticParseErrors;
 import util.SynthaticNode;
+import util.TokenType;
 
 import java.util.*;
-import util.TokenType;
 
 public class SemanticAnalyser {
     private static SemanticAnalyser instance;
@@ -57,52 +57,59 @@ public class SemanticAnalyser {
         }
     }
 
+    private boolean compareTypes(String first, String second) {
+        if (("int".equals(first) || "int".equals(second)) && ("float".equals(first) || "float".equals(second))) {
+            return true;
+        }
+        return first.equals(second);
+    }
+
     private String getExpressionValue(SynthaticNode synthaticNode) {
-        String firstValue = null;
+        String firstValue;
         String secondValue = null;
-        
+
         if (synthaticNode.getProduction().equals("<Expr Arit>")) {
-            firstValue = getValue(synthaticNode.getNodeList().get(0));
-            System.out.println(firstValue);
+            firstValue = this.getValue(synthaticNode.getNodeList().get(0));
             if (synthaticNode.getNodeList().get(1).getNodeList().size() > 1) {
                 secondValue = this.getValue(synthaticNode.getNodeList().get(1).getNodeList().get(1));
             }
-        }else{
-            this.getExpressionValue(synthaticNode.getNodeList().get(0));
+        } else {
+            return this.getExpressionValue(synthaticNode.getNodeList().get(0));
         }
-        
-        //System.out.println(firstValue); //debbug
-        //Se o segundo valor for diferente de null, verifico se batem os tipos, se sim retorno o tipo, se não, null
+
         if (secondValue != null) {
-            if (firstValue.equals(secondValue)) {
-                return firstValue;
-            }else{
+            if (secondValue.equals(firstValue)) {
+                return secondValue;
+            } else {
                 return null;
             }
-        }else{
-            //se second é null retorno o first
+        } else {
             return firstValue;
         }
-    } 
-    
-    private String getValue(SynthaticNode synthaticNode){
-        if (synthaticNode.getProduction()!= null) {
-            if(synthaticNode.getProduction().equals("<Value>")){
-                Token token  = synthaticNode.getNodeList().get(0).getToken();
-                
-                if (token.getType() == TokenType.STRING) {
-                    return "string";
-                }else if(token.getLexeme().getValue().equals("true") || token.getLexeme().getValue().equals("false")){
-                    return "bool";
-                }else{
-                    if (token.getLexeme().getValue().indexOf(".") != -1) {
-                        return "float";
-                    }else{
-                        return "int";
+    }
+
+    private String getValue(SynthaticNode synthaticNode) {
+        if (synthaticNode.getProduction() != null) {
+            switch (synthaticNode.getProduction()) {
+                case "<Value>":
+                    Token token = synthaticNode.getNodeList().get(0).getToken();
+                    if (token.getType() == TokenType.STRING) {
+                        return "string";
+                    } else if (token.getLexeme().getValue().equals("true") || token.getLexeme().getValue().equals("false")) {
+                        return "bool";
+                    } else {
+                        if (token.getLexeme().getValue().contains(".")) {
+                            return "float";
+                        } else {
+                            return "int";
+                        }
                     }
-                }
-            }else{
-                this.getValue(synthaticNode.getNodeList().get(0));
+                case "Identifier":
+                    return "string";
+                case "<Init Array>":
+                    return "array";
+                default:
+                    return this.getValue(synthaticNode.getNodeList().get(0));
             }
         }
         return null;
@@ -180,7 +187,7 @@ public class SemanticAnalyser {
                         this.scopeElements.put(scope, new HashMap<>());
                     }
                     if (hasConsumed.getNodeList().get(1).getNodeList().size() > 1) {
-                        if (!type.equals(this.getExpressionValue(hasConsumed.getNodeList().get(1).getNodeList().get(1)))) {
+                        if (!this.compareTypes(type, this.getExpressionValue(hasConsumed.getNodeList().get(1).getNodeList().get(1)))) {
                             this.toAnalyse(hasConsumed, this.validTypes, lexeme);
                         }
                     }
@@ -199,7 +206,7 @@ public class SemanticAnalyser {
                     this.toAnalyse(hasConsumed, this.validTypes, lexeme);
                 } else {
                     this.globalConstants.put(hasConsumed.getNodeList().get(0).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme().getValue(), type);
-                    if (!type.equals(this.getExpressionValue(hasConsumed.getNodeList().get(2)))) {
+                    if (!this.compareTypes(type, this.getExpressionValue(hasConsumed.getNodeList().get(2)))) {
                         this.toAnalyse(hasConsumed, this.validTypes, lexeme);
                     } else {
                         this.successAnalyzed.add(hasConsumed);
