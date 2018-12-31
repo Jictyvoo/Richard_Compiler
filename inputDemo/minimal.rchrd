@@ -30,10 +30,17 @@ class Pokemon extends Pikachu{
             write(masoq);
         }
     }
+
+    method void tasmanianDevil(String a){
+        return;
+    }
 }
 
 class Pikachu {
-    method void a(){
+    method void a(int opa){
+        return;
+    }
+    method void a(int opa){
         return;
     }
 }

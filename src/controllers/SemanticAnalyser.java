@@ -60,17 +60,32 @@ public class SemanticAnalyser {
         return synthaticNode.getProduction();
     }
 
+    private String getParametersString(SynthaticNode synthaticNode){
+        return synthaticNode.toString();
+    }
+
+    private String getMethodSignature(SynthaticNode synthaticNode){
+        String returnType = synthaticNode.getNodeList().get(1).getNodeList().get(0).getNodeList().get(0).getToken().getLexeme().getValue();
+        String methodName = synthaticNode.getNodeList().get(1).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme().getValue();
+        String parameters = this.getParametersString(synthaticNode.getNodeList().get(3));
+        return returnType + "_" + methodName + "__" + parameters;
+    }
+
     private void analyseMethod(SynthaticNode synthaticNode, String className) {
         Lexeme lexeme = synthaticNode.getNodeList().get(1).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme();
-        String methodName = lexeme.getValue();
-        if (this.classMethods.get(className).contains(methodName)) {
+        if (this.classMethods.get(className).contains(this.getMethodSignature(synthaticNode))) {
             this.errors.add(new ClassMethodError("Override", lexeme));
+            System.out.println(new ClassMethodError("Override", lexeme));
         }
+        this.classMethods.get(className).add(this.getMethodSignature(synthaticNode));
     }
 
     private void analyseClassCode(SynthaticNode synthaticNode, String className) {
         if ("<Methods>".equals(synthaticNode.getNodeList().get(0).getProduction())) {
             this.analyseMethod(synthaticNode.getNodeList().get(0), className);
+        }
+        if(synthaticNode.getNodeList().size() > 1 && !synthaticNode.getNodeList().get(1).isEmpty()){
+            this.analyseClassCode(synthaticNode.getNodeList().get(1), className);
         }
     }
 

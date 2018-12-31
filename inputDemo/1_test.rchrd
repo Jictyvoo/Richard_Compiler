@@ -1,4 +1,4 @@
-    class Pokemon{
+class Pokemon{
 
     variables {
         int idade = 2018-1997;
