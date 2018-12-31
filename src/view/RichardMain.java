@@ -57,7 +57,7 @@ public class RichardMain {
     }
 
     public static void main(String... args) {
-        String rootPath = args.length > 0 ? args[0] : "inputDemo/";
+        String rootPath = args.length > 0 ? args[0] : "src/";
         try {
             readDirectory(rootPath); /*Performs directory reading*/
             makeDirectories(rootPath); /*Create output directories*/

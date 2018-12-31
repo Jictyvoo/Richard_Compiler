@@ -47,7 +47,6 @@ public class SemanticAnalyser {
         if (this.postAnalysis.contains(synthaticNode)) {
             if (!this.alreadyAnalyzed.contains(synthaticNode)) {
                 this.errors.add(new IncorrectTypeError(error, lexeme));
-                System.out.println(new IncorrectTypeError(error, lexeme));
             } else {
                 this.alreadyAnalyzed.add(synthaticNode);
             }
