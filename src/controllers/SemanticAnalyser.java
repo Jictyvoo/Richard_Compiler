@@ -8,6 +8,7 @@ import models.value.errors.SemanticParseErrors;
 import util.SynthaticNode;
 
 import java.util.*;
+import util.TokenType;
 
 public class SemanticAnalyser {
     private static SemanticAnalyser instance;
@@ -57,7 +58,54 @@ public class SemanticAnalyser {
     }
 
     private String getExpressionValue(SynthaticNode synthaticNode) {
-        return synthaticNode.getProduction();
+        String firstValue = null;
+        String secondValue = null;
+        
+        if (synthaticNode.getProduction().equals("<Expr Arit>")) {
+            firstValue = getValue(synthaticNode.getNodeList().get(0));
+            System.out.println(firstValue);
+            if (synthaticNode.getNodeList().get(1).getNodeList().size() > 1) {
+                secondValue = this.getValue(synthaticNode.getNodeList().get(1).getNodeList().get(1));
+            }
+        }else{
+            this.getExpressionValue(synthaticNode.getNodeList().get(0));
+        }
+        
+        //System.out.println(firstValue); //debbug
+        //Se o segundo valor for diferente de null, verifico se batem os tipos, se sim retorno o tipo, se não, null
+        if (secondValue != null) {
+            if (firstValue.equals(secondValue)) {
+                return firstValue;
+            }else{
+                return null;
+            }
+        }else{
+            //se second é null retorno o first
+            return firstValue;
+        }
+    } 
+    
+    private String getValue(SynthaticNode synthaticNode){
+        if (synthaticNode.getProduction()!= null) {
+            if(synthaticNode.getProduction().equals("<Value>")){
+                Token token  = synthaticNode.getNodeList().get(0).getToken();
+                
+                if (token.getType() == TokenType.STRING) {
+                    return "string";
+                }else if(token.getLexeme().getValue().equals("true") || token.getLexeme().getValue().equals("false")){
+                    return "bool";
+                }else{
+                    if (token.getLexeme().getValue().indexOf(".") != -1) {
+                        return "float";
+                    }else{
+                        return "int";
+                    }
+                }
+            }else{
+                this.getValue(synthaticNode.getNodeList().get(0));
+            }
+        }
+        return null;
     }
 
     private String getParametersString(SynthaticNode synthaticNode) {
