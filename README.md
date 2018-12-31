@@ -1,4 +1,4 @@
-# Richard Compiler
+# Hashard Compiler
 
 A compiler for Richard Language written in Java for EXA 817 discipline
 
