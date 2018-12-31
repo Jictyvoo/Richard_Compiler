@@ -22,7 +22,7 @@ public class SemanticAnalyser {
     private HashMap<String, String> globalConstants;
     private HashMap<SynthaticNode, HashMap<String, String>> scopeElements;
 
-    static SemanticAnalyser getInstance() {
+    public static SemanticAnalyser getInstance() {
         if (instance == null) {
             instance = new SemanticAnalyser();
         }
@@ -60,11 +60,11 @@ public class SemanticAnalyser {
         return synthaticNode.getProduction();
     }
 
-    private String getParametersString(SynthaticNode synthaticNode){
+    private String getParametersString(SynthaticNode synthaticNode) {
         return synthaticNode.toString();
     }
 
-    private String getMethodSignature(SynthaticNode synthaticNode){
+    private String getMethodSignature(SynthaticNode synthaticNode) {
         String returnType = synthaticNode.getNodeList().get(1).getNodeList().get(0).getNodeList().get(0).getToken().getLexeme().getValue();
         String methodName = synthaticNode.getNodeList().get(1).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme().getValue();
         String parameters = this.getParametersString(synthaticNode.getNodeList().get(3));
@@ -75,7 +75,6 @@ public class SemanticAnalyser {
         Lexeme lexeme = synthaticNode.getNodeList().get(1).getNodeList().get(1).getNodeList().get(0).getToken().getLexeme();
         if (this.classMethods.get(className).contains(this.getMethodSignature(synthaticNode))) {
             this.errors.add(new ClassMethodError("Override", lexeme));
-            System.out.println(new ClassMethodError("Override", lexeme));
         }
         this.classMethods.get(className).add(this.getMethodSignature(synthaticNode));
     }
@@ -83,8 +82,10 @@ public class SemanticAnalyser {
     private void analyseClassCode(SynthaticNode synthaticNode, String className) {
         if ("<Methods>".equals(synthaticNode.getNodeList().get(0).getProduction())) {
             this.analyseMethod(synthaticNode.getNodeList().get(0), className);
+        } else if ("<Variables>".equals(synthaticNode.getNodeList().get(0).getProduction())) {
+            this.analyseVariableAssignment(synthaticNode.getNodeList().get(0).getNodeList().get(2));
         }
-        if(synthaticNode.getNodeList().size() > 1 && !synthaticNode.getNodeList().get(1).isEmpty()){
+        if (synthaticNode.getNodeList().size() > 1 && !synthaticNode.getNodeList().get(1).isEmpty()) {
             this.analyseClassCode(synthaticNode.getNodeList().get(1), className);
         }
     }
@@ -111,6 +112,21 @@ public class SemanticAnalyser {
                 }
             }
             this.analyseClassCode(hasConsumed.getNodeList().get(0).getNodeList().get(4), newType);
+        }
+    }
+
+    private void analyseVariableAssignment(SynthaticNode hasConsumed) {
+        String subProduction = hasConsumed.getNodeList().get(0).getProduction();
+        if (subProduction != null) {
+            Lexeme lexeme = hasConsumed.getNodeList().get(0).getNodeList().get(0).getNodeList().get(0).getToken().getLexeme();
+            String type = lexeme.getValue();
+            if (!this.validTypes.contains(type)) {
+                this.toAnalyse(hasConsumed, this.validTypes, lexeme);
+            } else {
+                if (!this.scopeElements.containsKey(hasConsumed.getNodeList().get(0))) {
+                    this.scopeElements.put(hasConsumed.getNodeList().get(0), new HashMap<>());
+                }
+            }
         }
     }
 
@@ -154,19 +170,7 @@ public class SemanticAnalyser {
         } else if ("<Constant Assignment>".equals(hasConsumed.getProduction())) {
             this.analyseConstantAssignment(hasConsumed);
         } else if ("<Variable Assignment>".equals(hasConsumed.getProduction())) {
-            String subProduction = hasConsumed.getNodeList().get(0).getProduction();
-            if (subProduction != null) {
-                Lexeme lexeme = hasConsumed.getNodeList().get(0).getNodeList().get(0).getNodeList().get(0).getToken().getLexeme();
-                String type = lexeme.getValue();
-                if (!this.validTypes.contains(type)) {
-                    this.toAnalyse(hasConsumed, this.validTypes, lexeme);
-                } else {
-                    if (!this.scopeElements.containsKey(hasConsumed.getNodeList().get(0))) {
-                        this.scopeElements.put(hasConsumed.getNodeList().get(0), new HashMap<>());
-                    }
-                    //System.out.println(this.scopeElements.get(hasConsumed.getNodeList().get(0)));
-                }
-            }
+            this.analyseVariableAssignment(hasConsumed);
         }
     }
 
@@ -174,5 +178,13 @@ public class SemanticAnalyser {
         for (SynthaticNode synthaticNode : this.postAnalysis) {
             this.analyse(synthaticNode);
         }
+    }
+
+    public List<SemanticParseErrors> getErrors() {
+        return this.errors;
+    }
+
+    public void reset() {
+        instance = new SemanticAnalyser();
     }
 }

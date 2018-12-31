@@ -3,10 +3,12 @@ package view;
 //Authors: João Victor & Eduardo Marques
 
 import controllers.LexicalAnalyser;
+import controllers.SemanticAnalyser;
 import controllers.SynthaticAutomatic;
 import models.business.FileManager;
 import models.value.Token;
 import models.value.errors.LexicalParseErrors;
+import models.value.errors.SemanticParseErrors;
 import models.value.errors.SynthaticParseErrors;
 import util.SynthaticNode;
 import util.exception.FileNotExistsException;
@@ -83,6 +85,10 @@ public class RichardMain {
                                 writer.println(synthaticParseErrors.toString());
                         }
                         SynthaticAutomatic.getInstance().clearErrors();
+                        for (SemanticParseErrors semanticParseErrors : SemanticAnalyser.getInstance().getErrors()) {
+                            writer.println(semanticParseErrors.toString());
+                        }
+                        SemanticAnalyser.getInstance().reset();
                     } else {
                         writer.println("\n\nErrors Bellow\n\n");
                         for (LexicalParseErrors lexicalParseErrors : lexicalAnalyser.getParseErrors().get(filename)) {
